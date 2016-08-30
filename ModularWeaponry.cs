@@ -41,7 +41,7 @@ namespace ModularWeaponry
 
                 if (index < 0) return false;
 
-                info.modulesInstalled[index] = 1;
+                //info.modulesInstalled[index] = 1;
 
                 return true;
             });
