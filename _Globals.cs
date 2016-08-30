@@ -11,42 +11,40 @@ namespace ModularWeaponry
         public override bool NeedsCustomSaving(Item item)
         {
             IInfo info = item.GetModInfo<IInfo>(mod);
-            return info.modulesInstalled != null;
+            return info.modules != null;
         }
 
-        public override void SaveCustomData(Item item, BinaryWriter writer)
+        public override void SaveCustomData(Item item,BinaryWriter writer)
         {
-            IInfo info = item.GetModInfo<IInfo>(mod);
-
-            string writeString = "";
-            for (int i = 0; i < info.modulesInstalled.Length; ++i)
+            IInfo info=item.GetModInfo<IInfo>(mod);
+            string writeString="";
+            for(byte i=0;i<info.modules.Length;++i)
             {
-                writeString += info.modulesInstalled[i] + ";";
+                writeString+=ItemLoader.GetItem(info.modules[i]).name+";";
             }
             writer.Write(writeString);
         }
         public override void LoadCustomData(Item item, BinaryReader reader)
         {
             IInfo info = item.GetModInfo<IInfo>(mod);
-            info.modulesInstalled = new int[3];
-
+            info.modules = new ushort[3];
             string[] splitModules = reader.ReadString().Split(';');
-            for (int i = 0; i < info.modulesInstalled.Length; ++i)
+            for (byte i=0;i<info.modules.Length;++i)
             {
-                info.modulesInstalled[i] = int.Parse(splitModules[i]);
+                info.modules[i]=mod.ItemType(splitModules[i]);
             }
         }
     }
 
     public class IInfo : ItemInfo
     {
-        public int[] modulesInstalled;
+        public ushort[] modules;
 
         public int GetEmptyModule()
         {
-            for(int i = 0; i < modulesInstalled.Length; ++i)
+            for(int i = 0; i < modules.Length; ++i)
             {
-                if (modulesInstalled[i] == 0)
+                if (modules[i] == 0)
                     return i;
             }
             return -1;
