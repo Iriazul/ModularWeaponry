@@ -20,12 +20,13 @@ namespace ModularWeaponry
 			string writeString="";
 			for(byte i=0;i<info.modules.Length;++i)
 			{
+				if(info.modules[i]!=0)
 				{
-					writeString+=ItemLoader.GetItem(info.modules[i]).item.name+";";
+					writeString+=Main.itemName[info.modules[i]]+";";
 				}
 				else
 				{
-					writeString+=" ;";
+					writeString+=";";
 				}
 			}
 			writer.Write(writeString);
@@ -33,8 +34,8 @@ namespace ModularWeaponry
 		public override void LoadCustomData(Item item, BinaryReader reader)
 		{
 			IInfo info = item.GetModInfo<IInfo>(mod);
-			info.modules = new ushort[5];
 			string[] splitModules = reader.ReadString().Split(';');
+			info.modules = new ushort[splitModules.Length-1];
 			for (byte i=0;i<info.modules.Length;++i)
 			{
 				info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
