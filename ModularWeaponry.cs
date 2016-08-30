@@ -81,7 +81,7 @@ namespace ModularWeaponry
                             IInfo info = item.GetModInfo<IInfo>(this);
                             if (info.modules == null)
                                 info.modules = new ushort[5];
-
+                            
                             itemModules = new Item[info.modules.Length];
                             for (int i = 0; i < itemModules.Length; ++i)
                             {
