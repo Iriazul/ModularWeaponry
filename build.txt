@@ -1,0 +1,7 @@
+﻿author = Lord Bozo & Iriazul
+version = 0.01
+displayName = Modular Weaponry
+hideCode = true
+hideResources = true
+includeSource = false
+buildIgnore = *.csproj, *.user, obj\*, bin\*, .vs\*
