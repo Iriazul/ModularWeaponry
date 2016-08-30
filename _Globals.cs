@@ -20,7 +20,7 @@ namespace ModularWeaponry
             string writeString="";
             for(byte i=0;i<info.modules.Length;++i)
             {
-                writeString+=ItemLoader.GetItem(info.modules[i]).name+";";
+                writeString+=ItemLoader.GetItem(info.modules[i]).item.name+";";
             }
             writer.Write(writeString);
         }
