@@ -4,7 +4,7 @@ using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace ModularWeaponry.Items
+namespace ModularWeaponry
 {
     public class GItem : GlobalItem
     {

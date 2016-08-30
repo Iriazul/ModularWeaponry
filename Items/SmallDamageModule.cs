@@ -6,7 +6,7 @@ using Terraria.ModLoader;
 
 using ModularWeaponry.Items.Base;
 
-namespace Modular_Weaponry.Items
+namespace ModularWeaponry.Items
 {
     public class SmallDamageModule : Module
     {

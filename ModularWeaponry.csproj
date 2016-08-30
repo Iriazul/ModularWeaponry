@@ -8,8 +8,8 @@
     <ProjectGuid>{99373A09-D34B-40A9-802D-8A92C5A29D5B}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Modular_Weaponry</RootNamespace>
-    <AssemblyName>Modular_Weaponry</AssemblyName>
+    <RootNamespace>ModularWeaponry</RootNamespace>
+    <AssemblyName>ModularWeaponry</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -49,15 +49,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Items\Base\Module.cs" />
+    <Compile Include="Items\Placeable\ModularWorkbench.cs" />
     <Compile Include="Items\SmallDamageModule.cs" />
-    <Compile Include="Items\_Globals.cs" />
+    <Compile Include="MPlayer.cs" />
+    <Compile Include="_Globals.cs" />
     <Compile Include="ModularWeaponry.cs" />
+    <Compile Include="Tiles\ModularWorkbench.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
     <Content Include="build.txt" />
+    <Content Include="description.txt" />
     <Content Include="Items\Base\Module.png" />
+    <Content Include="Items\Placeable\ModularWorkbench.png" />
     <Content Include="Items\SmallDamageModule.png" />
+    <Content Include="Tiles\ModularWorkbench.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

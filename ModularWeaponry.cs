@@ -45,14 +45,6 @@ namespace ModularWeaponry
 
                 return true;
             });
-
-
-            this.RegisterHotKey("bla", "L");
-        }
-        public override void HotKeyPressed(string name)
-        {
-            if (name == "bla")
-                moduleInterfaceOpen = !moduleInterfaceOpen;
         }
 
         public Item weapon;
