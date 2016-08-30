@@ -47,12 +47,14 @@ namespace ModularWeaponry
             });
         }
 
-        public Item weapon;
-        public Item module;
+        public Item item;
+        public Item lastItem;
+        public Item[] itemModules;
+
         public override void PostDrawInterface(SpriteBatch spriteBatch)
         {
-            if (weapon == null) weapon = new Item();
-            if (module == null) module = new Item();
+            if (item == null) item = new Item();
+            if (lastItem == null) lastItem = new Item();
 
             // Here we check if we're not in any UI and if the players' inventory is open.            
             if (!Main.ingameOptionsWindow && Main.playerInventory && !Main.inFancyUI && moduleInterfaceOpen)
@@ -61,50 +63,73 @@ namespace ModularWeaponry
 
                 // Handle weapon Item.
                 Vector2 drawPos = new Vector2(110, 280);
-                this.HandleUIItem(spriteBatch, ref weapon, drawPos);
-                // Handle module Item.
-                drawPos = new Vector2(110 + 52, 280);
-                this.HandleUIItem(spriteBatch, ref module, drawPos, true);
+                this.HandleUIItem(spriteBatch, ref item, drawPos);
 
-                drawPos = new Vector2(110 + 102, 288);
-                bool hover = false;
-                if (Main.mouseX > drawPos.X && Main.mouseX < drawPos.X + 30 &&
-                            Main.mouseY > drawPos.Y && Main.mouseY < drawPos.Y + 30 && !PlayerInput.IgnoreMouseInterface)
+                // Check if the item that is being modified has been switched out and if so, if it's not an 'empty' item.
+                if (lastItem != item && item.type > 0)
                 {
-                    Main.player[Main.myPlayer].mouseInterface = true;
-
-                    hover = true;
-                }
-
-                // Click on craft button
-                if(hover && Main.mouseLeftRelease && Main.mouseLeft)
-                {
-                    if (weapon.type != 0 && module.type != 0)
+                    // If so, reset the 'itemModules' array and fill it with the appropriate items.
+                    IInfo info = item.GetModInfo<IInfo>(this);
+                    itemModules = new Item[info.modules.Length];
+                    for (int i = 0; i < itemModules.Length; ++i)
                     {
-                        if (((Module)module.modItem).applyModule(ref weapon))
-                        {
-                            module = new Item();
-                        }
+                        itemModules[i].SetDefaults(info.modules[i]);
                     }
                 }
-                // Draw craft button.
-                spriteBatch.Draw(Main.craftToggleTexture[hover ? 1 : 0], drawPos, Color.White);
+
+                // If there is actually an item being modified.
+                if(item.type > 0)
+                {
+                    for(int i = 0; i < itemModules.Length; ++i)
+                    {
+                        drawPos = new Vector2(110 + (52 * i), 280 + 52);
+                        if (Main.mouseX >= drawPos.X && Main.mouseX <= drawPos.X + Main.inventoryBackTexture.Width * Main.inventoryScale && (Main.mouseY >= drawPos.Y && Main.mouseY <= drawPos.Y + Main.inventoryBackTexture.Height * Main.inventoryScale))
+                        {
+                            Main.player[Main.myPlayer].mouseInterface = true;
+
+                            if (Main.mouseLeftRelease && Main.mouseLeft)
+                            {
+                                if (Main.mouseItem.type == 0 || Main.mouseItem.IsModule())
+                                {
+                                    ItemSlot.LeftClick(itemModules, 0, i);
+                                }
+                            }
+                            ItemSlot.MouseHover(itemModules, 0, i);
+                        }
+                        ItemSlot.Draw(spriteBatch, itemModules, 1, i, drawPos);
+                    }
+                }
+
+                lastItem = item;
             }
-            else if (!moduleInterfaceOpen && (weapon.type != 0 || module.type != 0))
+            else if (!moduleInterfaceOpen && item.type != 0)
             {
-                // Drop any items that were left in the item spots
+                // Drop the weapon if it was left in the item slot.
+                for (int i = 0; i < 400; ++i)
+                {
+                    if(!Main.item[i].active || Main.item[i].type == 0)
+                    {
+                        Main.item[i] = item;
+                        Main.item[i].position = Main.player[Main.myPlayer].Center;
+
+                        item = new Item();
+                        break;
+                    }
+                }
             }
+
+            lastItem = item;
         }
 
-        private void HandleUIItem(SpriteBatch spriteBatch, ref Item item, Vector2 drawPos, bool module = false)
+        private void HandleUIItem(SpriteBatch spriteBatch, ref Item item, Vector2 drawPos)
         {
-            if (Main.mouseX >= drawPos.X && (double)Main.mouseX <= (double)drawPos.X + (double)Main.inventoryBackTexture.Width * (double)Main.inventoryScale && (Main.mouseY >= drawPos.Y && (double)Main.mouseY <= (double)drawPos.Y + (double)Main.inventoryBackTexture.Height * (double)Main.inventoryScale))
+            if (Main.mouseX >= drawPos.X && Main.mouseX <= drawPos.X + Main.inventoryBackTexture.Width * Main.inventoryScale && (Main.mouseY >= drawPos.Y && Main.mouseY <= drawPos.Y + Main.inventoryBackTexture.Height * Main.inventoryScale))
             {
                 Main.player[Main.myPlayer].mouseInterface = true;
 
                 if (Main.mouseLeftRelease && Main.mouseLeft)
                 {
-                    if (Main.mouseItem.type == 0 || (module && Main.mouseItem.IsModule()) || (!module && Main.mouseItem.damage > 0))
+                    if (Main.mouseItem.type == 0 || Main.mouseItem.damage > 0)
                     {
                         ItemSlot.LeftClick(ref item, 0);
                     }
