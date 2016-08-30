@@ -31,7 +31,7 @@ namespace ModularWeaponry
             string[] splitModules = reader.ReadString().Split(';');
             for (byte i=0;i<info.modules.Length;++i)
             {
-                info.modules[i]=mod.ItemType(splitModules[i]);
+                info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
             }
         }
     }
