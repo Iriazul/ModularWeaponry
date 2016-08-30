@@ -19,9 +19,6 @@ namespace ModularWeaponry.Items
             this.applyModule = delegate (ref Item weapon)
             {
                 IInfo info = weapon.GetModInfo<IInfo>(mod);
-                int index = info.GetEmptyModule();
-
-                if (index < 0) return false;
 
                 return true;
             };

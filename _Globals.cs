@@ -27,7 +27,7 @@ namespace ModularWeaponry
         public override void LoadCustomData(Item item, BinaryReader reader)
         {
             IInfo info = item.GetModInfo<IInfo>(mod);
-            info.modules = new ushort[3];
+            info.modules = new ushort[5];
             string[] splitModules = reader.ReadString().Split(';');
             for (byte i=0;i<info.modules.Length;++i)
             {
@@ -39,15 +39,5 @@ namespace ModularWeaponry
     public class IInfo : ItemInfo
     {
         public ushort[] modules;
-
-        public int GetEmptyModule()
-        {
-            for(int i = 0; i < modules.Length; ++i)
-            {
-                if (modules[i] == 0)
-                    return i;
-            }
-            return -1;
-        }
     }
 }

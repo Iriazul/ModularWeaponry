@@ -37,11 +37,6 @@ namespace ModularWeaponry
             modules.Add(1, delegate (ref Item weapon)
             {
                 IInfo info = weapon.GetModInfo<IInfo>(this);
-                int index = info.GetEmptyModule();
-
-                if (index < 0) return false;
-
-                //info.modulesInstalled[index] = 1;
 
                 return true;
             });
@@ -66,21 +61,45 @@ namespace ModularWeaponry
                 this.HandleUIItem(spriteBatch, ref item, drawPos);
 
                 // Check if the item that is being modified has been switched out and if so, if it's not an 'empty' item.
-                if (lastItem != item && item.type > 0)
+                if (lastItem != item)
                 {
-                    // If so, reset the 'itemModules' array and fill it with the appropriate items.
-                    IInfo info = item.GetModInfo<IInfo>(this);
-                    itemModules = new Item[info.modules.Length];
-                    for (int i = 0; i < itemModules.Length; ++i)
+                    // Set the modules for the last item correctly.
+                    if (lastItem.type != 0)
                     {
-                        itemModules[i].SetDefaults(info.modules[i]);
+                        IInfo lastInfo = lastItem.GetModInfo<IInfo>(this);
+                        for (int i = 0; i < itemModules.Length; ++i)
+                        {
+                            lastInfo.modules[i] = (ushort)itemModules[i].type;
+                        }
+                    }
+
+                    try
+                    {
+                        if (item.type > 0)
+                        {
+                            // If so, reset the 'itemModules' array and fill it with the appropriate items.
+                            IInfo info = item.GetModInfo<IInfo>(this);
+                            if (info.modules == null)
+                                info.modules = new ushort[5];
+
+                            itemModules = new Item[info.modules.Length];
+                            for (int i = 0; i < itemModules.Length; ++i)
+                            {
+                                itemModules[i] = new Item();
+                                itemModules[i].SetDefaults(info.modules[i]);
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Main.NewText(e.Message);
                     }
                 }
 
                 // If there is actually an item being modified.
                 if(item.type > 0)
                 {
-                    for(int i = 0; i < itemModules.Length; ++i)
+                    for (int i = 0; i < itemModules.Length; ++i)
                     {
                         drawPos = new Vector2(110 + (52 * i), 280 + 52);
                         if (Main.mouseX >= drawPos.X && Main.mouseX <= drawPos.X + Main.inventoryBackTexture.Width * Main.inventoryScale && (Main.mouseY >= drawPos.Y && Main.mouseY <= drawPos.Y + Main.inventoryBackTexture.Height * Main.inventoryScale))
@@ -105,6 +124,12 @@ namespace ModularWeaponry
             else if (!moduleInterfaceOpen && item.type != 0)
             {
                 // Drop the weapon if it was left in the item slot.
+                IInfo info = item.GetModInfo<IInfo>(this);
+                for(int i = 0; i < itemModules.Length; ++i)
+                {
+                    info.modules[i] = (ushort)itemModules[i].type;
+                }
+
                 for (int i = 0; i < 400; ++i)
                 {
                     if(!Main.item[i].active || Main.item[i].type == 0)
