@@ -1,4 +1,4 @@
-﻿﻿author = Lord Bozo & Iriazul
+﻿﻿author = Lord Bozo, Iriazul, and Rartrin
 version = 0.0.1
 displayName = Modular Weaponry
 hideCode = true
