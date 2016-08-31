@@ -44,6 +44,8 @@ namespace ModularWeaponry
 		}
 		public override void LoadCustomData(Item item, BinaryReader reader)
 		{
+			try
+			{
 			IInfo info = item.GetModInfo<IInfo>(mod);
 			string[] splitModules = reader.ReadString().Split(';');
 			info.modules = new ushort[splitModules.Length-1];
@@ -55,6 +57,8 @@ namespace ModularWeaponry
 				itemModules[i]=temp!=null?temp.item:new Item();
 			}
 			item.UpdateStats(itemModules);
+			}
+			catch(Exception e){}
 		}
 		
 		public override void OnHitNPC(Item item,Player player,NPC npc,int damage,float knockBack,bool crit)
