@@ -172,7 +172,11 @@ namespace ModularWeaponry
 			{
 				if(module!=null&&module.type>0)
 				{
-					Module.updateStats[Main.itemName[module.type]](ref item);
+					ApplyStats applyStats;
+					if(Module.updateStats.TryGetValue(Main.itemName[module.type],out applyStats))
+					{
+						applyStats(item);
+					}
 				}
 			}
 		}

@@ -7,8 +7,8 @@ using Terraria.ModLoader;
 namespace ModularWeaponry.Items.Base
 {
 	
-	public delegate void ApplyStats(ref Item item);
-	public delegate void ApplyHitNPC(ref Item item,ref Player player,ref NPC npc);
+	public delegate void ApplyStats(Item item);
+	public delegate void ApplyHitNPC(Entity attacker,NPC npc);
 	
 	public class Module:ModItem
 	{
