@@ -3,6 +3,7 @@ using System.IO;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using ModularWeaponry.Items.Base;
 
 namespace ModularWeaponry
 {
@@ -11,7 +12,17 @@ namespace ModularWeaponry
 		public override bool NeedsCustomSaving(Item item)
 		{
 			IInfo info = item.GetModInfo<IInfo>(mod);
-			return info.modules != null;
+			if(info.modules!=null)
+			{
+				foreach(ushort type in info.modules)
+				{
+					if(type!=0)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
 		}
 
 		public override void SaveCustomData(Item item,BinaryWriter writer)
@@ -26,7 +37,7 @@ namespace ModularWeaponry
 				}
 				else
 				{
-					writeString+=";";
+					writeString+=" ;";
 				}
 			}
 			writer.Write(writeString);
@@ -36,9 +47,28 @@ namespace ModularWeaponry
 			IInfo info = item.GetModInfo<IInfo>(mod);
 			string[] splitModules = reader.ReadString().Split(';');
 			info.modules = new ushort[splitModules.Length-1];
-			for (byte i=0;i<info.modules.Length;++i)
+			Item[] itemModules=new Item[splitModules.Length-1];
+			for(byte i=0;i<info.modules.Length;++i)
 			{
 				info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
+				ModItem temp=mod.GetItem(splitModules[i]);
+				itemModules[i]=temp!=null?temp.item:new Item();
+			}
+			item.UpdateStats(itemModules);
+		}
+		
+		public override void OnHitNPC(Item item,Player player,NPC npc,int damage,float knockBack,bool crit)
+		{
+			IInfo info=item.GetModInfo<IInfo>(mod);
+			if(info!=null)
+			{
+				foreach(ushort type in info.modules)
+				{
+					if(Module.onHitNPC.ContainsKey(Main.itemName[type]))
+					{
+						Module.onHitNPC[Main.itemName[type]](ref item,ref player,ref npc);
+					}
+				}
 			}
 		}
 	}

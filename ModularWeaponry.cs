@@ -10,36 +10,24 @@ using Terraria.ID;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 
-using ModularWeaponry.Items.Base;
 using ModularWeaponry.Items;
+using ModularWeaponry.Items.Base;
 
 namespace ModularWeaponry
 {
 	public class ModularWeaponry : Mod
 	{
-		public static Dictionary<ushort,ApplyModule> actions;
 		public static bool moduleInterfaceOpen;
-		
+		public static ModularWeaponry mod;
 		public ModularWeaponry()
 		{
+			mod=this;
 			this.Properties = new ModProperties()
 			{
 				Autoload = true,
 				AutoloadGores = true,
 				AutoloadSounds = true
 			};
-		}
-
-		public override void Load()
-		{
-			actions = new Dictionary<int, ApplyModule>();
-
-			/*actions.Add(1, delegate (ref Item weapon)
-			{
-				IInfo info = weapon.GetModInfo<IInfo>(this);
-
-				return true;
-			});*/
 		}
 
 		public Item item;
@@ -108,9 +96,10 @@ namespace ModularWeaponry
 
 							if (Main.mouseLeftRelease && Main.mouseLeft)
 							{
-								if (Main.mouseItem.type == 0 || Main.mouseItem.IsModule())
+								if (Main.mouseItem.type == 0 || (Main.mouseItem.IsModule()&&((item.GetTypes()&Main.mouseItem.GetTypes())>0)))
 								{
 									ItemSlot.LeftClick(itemModules, 0, i);
+									item.UpdateStats(itemModules);
 								}
 							}
 							ItemSlot.MouseHover(itemModules, 0, i);
@@ -154,10 +143,11 @@ namespace ModularWeaponry
 
 				if (Main.mouseLeftRelease && Main.mouseLeft)
 				{
-					if (Main.mouseItem.type == 0 || Main.mouseItem.damage > 0)
-					{
+					//if (Main.mouseItem.type == 0)
+					//{
 						ItemSlot.LeftClick(ref item, 0);
-					}
+						//item.UpdateStats(itemModules);
+					//}
 				}
 				ItemSlot.MouseHover(ref item, 0);
 			}
@@ -170,6 +160,50 @@ namespace ModularWeaponry
 		public static bool IsModule(this Item item)
 		{
 			return item.modItem is Module;
+		}
+		
+		public static void UpdateStats(this Item item,Item[] itemModules)
+		{
+			Item temp=item.Clone();
+			item.SetDefaults(item.type);
+			item.Prefix(temp.prefix);
+			item.GetModInfo<IInfo>(ModularWeaponry.mod).modules=temp.GetModInfo<IInfo>(ModularWeaponry.mod).modules;
+			foreach(Item module in itemModules)
+			{
+				if(module!=null&&module.type>0)
+				{
+					Module.updateStats[Main.itemName[module.type]](ref item);
+				}
+			}
+		}
+		
+		public static ItemType GetTypes(this Item item)
+		{
+			if(item.IsModule()){return((Module)item.modItem).itemType;}
+			ItemType r=ItemType.None;
+			if(item.melee)			{r|=ItemType.Melee;}
+			if(item.ranged)			{r|=ItemType.Range;}
+			if(item.magic)			{r|=ItemType.Magic;}
+			if(item.useStyle==5)
+			{
+				if(item.pick>0)		{r|=ItemType.Drill;}
+				if(item.axe>0)		{r|=ItemType.Saw;}
+				if(item.hammer>0)	{r|=ItemType.Jack;}
+			}
+			else
+			{
+				if(item.pick>0)		{r|=ItemType.Pick;}
+				if(item.axe>0)		{r|=ItemType.Axe;}
+				if(item.hammer>0)	{r|=ItemType.Hammer;}
+			}
+			if(item.headSlot>-1)	{r|=ItemType.Head;}
+			if(item.bodySlot>-1)	{r|=ItemType.Chest;}
+			if(item.legSlot>-1)		{r|=ItemType.Legs;}
+			//if(item.)		{r|=ItemType.Wings;}
+			if(item.accessory)		{r|=ItemType.Accessory;}
+			if(item.createTile>-1)	{r|=ItemType.Tile;}
+			if(item.createWall>-1)	{r|=ItemType.Wall;}
+			return r;
 		}
 	}
 }
