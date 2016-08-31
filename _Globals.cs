@@ -11,6 +11,23 @@ namespace ModularWeaponry
 {
 	public class GItem : GlobalItem
 	{
+		private static IInfo tempItemInfo;
+		
+		public override void PreReforge(Item item)
+		{
+			tempItemInfo=item.GetModInfo<IInfo>(mod);
+		}
+		
+		public override void PostReforge(Item item)
+		{
+			if(tempItemInfo!=null)
+			{
+				IInfo info=item.GetModInfo<IInfo>(mod);
+				info.modules=tempItemInfo.modules;
+				tempItemInfo=null;
+			}
+		}
+		
 		public override bool NeedsCustomSaving(Item item)
 		{
 			IInfo info = item.GetModInfo<IInfo>(mod);
@@ -48,22 +65,22 @@ namespace ModularWeaponry
 		{
 			try
 			{
-			IInfo info = item.GetModInfo<IInfo>(mod);
-			string[] splitModules = reader.ReadString().Split(';');
-			info.modules = new ushort[splitModules.Length-1];
-			Item[] itemModules=new Item[splitModules.Length-1];
-			for(byte i=0;i<info.modules.Length;++i)
-			{
-				info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
-				ModItem temp=mod.GetItem(splitModules[i]);
-				itemModules[i]=temp!=null?temp.item:new Item();
-			}
-			item.UpdateStats(itemModules);
+				IInfo info = item.GetModInfo<IInfo>(mod);
+				string[] splitModules = reader.ReadString().Split(';');
+				info.modules = new ushort[splitModules.Length-1];
+				Item[] itemModules=new Item[splitModules.Length-1];
+				for(byte i=0;i<info.modules.Length;++i)
+				{
+					info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
+					ModItem temp=mod.GetItem(splitModules[i]);
+					itemModules[i]=temp!=null?temp.item:new Item();
+				}
+				item.UpdateStats(itemModules);
 			}
 			catch(Exception e){}
 		}
 		
-		public override bool Shoot(Item item,Player player,ref Vector2 position,ref float speedX,ref float speedY,ref int type,ref int damage,ref float knockBack)
+		/*public override bool Shoot(Item item,Player player,ref Vector2 position,ref float speedX,ref float speedY,ref int type,ref int damage,ref float knockBack)
 		{
 			IInfo itemInfo=player.inventory[player.selectedItem].GetModInfo<IInfo>(mod);
 			if(itemInfo!=null)
@@ -84,7 +101,7 @@ namespace ModularWeaponry
 				}
 			}
 			return true;
-		}
+		}*/
 		
 		public override void OnHitNPC(Item item,Player player,NPC npc,int damage,float knockBack,bool crit)
 		{
@@ -105,16 +122,30 @@ namespace ModularWeaponry
 	
 	public class GProjectile:GlobalProjectile
 	{
-		public static Stack<ushort> hitEffectForNextProjectile;
+		/*public static Stack<ushort> hitEffectForNextProjectile;
 		public override void SetDefaults(Projectile projectile)
 		{
 			if(hitEffectForNextProjectile!=null)
 			{
-				Main.NewText("Owned by Player");
 				PInfo projInfo=projectile.GetModInfo<PInfo>(mod);
 				projInfo.hitEffects=hitEffectForNextProjectile;
 				hitEffectForNextProjectile=null;
 			}
+		}*/
+		public override bool PreAI(Projectile projectile)
+		{
+			PInfo projInfo=projectile.GetModInfo<PInfo>(mod);
+			if(projInfo.check)
+			{
+				projInfo.check=false;
+				Player player=Main.player[Main.myPlayer];
+				IInfo itemInfo=player.inventory[player.selectedItem].GetModInfo<IInfo>(mod);
+				if(itemInfo.modules!=null)
+				{
+					projInfo.hitEffects=itemInfo.modules;
+				}
+			}
+			return true;
 		}
 		public override void OnHitNPC(Projectile projectile,NPC npc,int damage,float knockback,bool crit)
 		{
@@ -123,8 +154,10 @@ namespace ModularWeaponry
 			{
 				foreach(ushort type in info.hitEffects)
 				{
-					Main.NewText("Apply hit to NPC");
-					Module.onHitNPC[Main.itemName[type]](projectile,npc);
+					if(type!=0&&Module.onHitNPC.ContainsKey(Main.itemName[type]))
+					{
+						Module.onHitNPC[Main.itemName[type]](projectile,npc);
+					}
 				}
 			}
 		}
@@ -137,6 +170,7 @@ namespace ModularWeaponry
 	
 	public class PInfo:ProjectileInfo
 	{
-		public Stack<ushort> hitEffects;
+		public bool check=true;
+		public ushort[] hitEffects;
 	}
 }

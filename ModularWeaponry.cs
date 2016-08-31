@@ -170,7 +170,7 @@ namespace ModularWeaponry
 			item.GetModInfo<IInfo>(ModularWeaponry.mod).modules=temp.GetModInfo<IInfo>(ModularWeaponry.mod).modules;
 			foreach(Item module in itemModules)
 			{
-				if(module!=null&&module.type>0)
+				if(module.type>0)
 				{
 					ApplyStats applyStats;
 					if(Module.updateStats.TryGetValue(Main.itemName[module.type],out applyStats))
