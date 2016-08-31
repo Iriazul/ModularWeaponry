@@ -8,19 +8,17 @@ using ModularWeaponry.Items.Base;
 
 namespace ModularWeaponry.Items
 {
-    public class SmallDamageModule : Module
-    {
-        public override void SetDefaults()
-        {
-            item.name = "Small Damage Module";
-            item.width = item.height = 16;
-            
-            this.applyModule = delegate (ref Item weapon)
-            {
-                IInfo info = weapon.GetModInfo<IInfo>(mod);
-                weapon.damage *= 1.1;
-                return true;
-            };
-        }
-    }
+	public class SmallDamageModule : Module
+	{
+		public override void SetDefaults()
+		{
+			item.name = "Small Damage Module";
+			item.width = item.height = 16;
+			this.applyModule = delegate (ref Item weapon)
+			{
+				IInfo info = weapon.GetModInfo<IInfo>(mod);
+				weapon.damage *= 1.1;
+			};
+		}
+	}
 }
