@@ -143,7 +143,7 @@ namespace ModularWeaponry
 
 				if (Main.mouseLeftRelease && Main.mouseLeft)
 				{
-					if (Main.mouseItem.type==0||!Main.mouseItem.IsModule())
+					if (Main.mouseItem.type==0||((Main.mouseItem.GetTypes()>0)&&!Main.mouseItem.IsModule()))
 					{
 						ItemSlot.LeftClick(ref item, 0);
 						//item.UpdateStats(itemModules);

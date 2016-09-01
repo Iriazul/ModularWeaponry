@@ -137,12 +137,15 @@ namespace ModularWeaponry
 			PInfo projInfo=projectile.GetModInfo<PInfo>(mod);
 			if(projInfo.check)
 			{
-				projInfo.check=false;
-				Player player=Main.player[Main.myPlayer];
-				IInfo itemInfo=player.inventory[player.selectedItem].GetModInfo<IInfo>(mod);
-				if(itemInfo.modules!=null)
+				if(projectile.friendly)
 				{
-					projInfo.hitEffects=itemInfo.modules;
+					projInfo.check=false;
+					Player player=Main.player[projectile.owner];
+					IInfo itemInfo=player.inventory[player.selectedItem].GetModInfo<IInfo>(mod);
+					if(itemInfo.modules!=null)
+					{
+						projInfo.hitEffects=itemInfo.modules;
+					}
 				}
 			}
 			return true;

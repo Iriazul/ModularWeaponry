@@ -32,7 +32,7 @@ namespace ModularWeaponry.Items.Base
 	}
 	
 	[Flags]
-	public enum ItemType:ushort
+	public enum ItemType:uint
 	{
 		//Damage type
 		Melee=	1<<0,
@@ -57,6 +57,9 @@ namespace ModularWeaponry.Items.Base
 		
 		Tile=	1<<14,
 		Wall=	1<<15,
+		
+		Ammo=	1<<16,//Weapons that use ammo
+		Mana=	1<<17,//Weapons that use mana
 		
 		Weap=	ItemType.Melee	|ItemType.Range	|ItemType.Magic,	//Any weapon
 		Mine=	ItemType.Pick	|ItemType.Drill,//Pick or Drill
