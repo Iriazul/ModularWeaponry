@@ -143,11 +143,11 @@ namespace ModularWeaponry
 
 				if (Main.mouseLeftRelease && Main.mouseLeft)
 				{
-					//if (Main.mouseItem.type == 0)
-					//{
+					if (Main.mouseItem.type==0||!Main.mouseItem.IsModule())
+					{
 						ItemSlot.LeftClick(ref item, 0);
 						//item.UpdateStats(itemModules);
-					//}
+					}
 				}
 				ItemSlot.MouseHover(ref item, 0);
 			}
@@ -183,7 +183,7 @@ namespace ModularWeaponry
 		
 		public static ItemType GetTypes(this Item item)
 		{
-			if(item.IsModule()){return((Module)item.modItem).itemType;}
+			if(item.IsModule()){return((Module)item.modItem).GetItemType();}
 			ItemType r=ItemType.None;
 			if(item.melee)			{r|=ItemType.Melee;}
 			if(item.ranged)			{r|=ItemType.Range;}

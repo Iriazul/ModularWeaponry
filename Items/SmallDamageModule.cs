@@ -8,18 +8,18 @@ namespace ModularWeaponry.Items
 {
 	public class SmallDamageModule:Module
 	{
-		public override void InitializeActions(ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
+		public override void Initialize(ref ItemType itemType,ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
 		{
+			itemType=ItemType.Weap|ItemType.Tool;
 			applyStats=delegate(Item item)
 			{
-				item.damage=(int)(item.damage*1.1);
+				item.damage=(int)(item.damage*1.1+1);
 			};
 		}
 		public override void SetDefaults()
 		{
 			item.name="Small Damage Module";
 			item.toolTip="";
-			itemType=ItemType.Weap|ItemType.Tool;
 			
 			item.width=item.height=16;
 		}

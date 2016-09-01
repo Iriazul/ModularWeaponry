@@ -15,18 +15,19 @@ namespace ModularWeaponry.Items.Base
 		public static Dictionary<string,ApplyStats> updateStats=new Dictionary<string,ApplyStats>();
 		public static Dictionary<string,ApplyHitNPC> onHitNPC=new Dictionary<string,ApplyHitNPC>();
 		
-		public ItemType itemType;
+		private static ItemType _itemType;
 		
-		public virtual void InitializeActions(ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC){}
+		public ItemType GetItemType(){return _itemType;}
+		public virtual void Initialize(ref ItemType itemType,ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC){}
 		
 		public override bool Autoload(ref string name,ref string texture,IList<EquipType> equips)
 		{
 			ApplyStats applyStats=null;
 			ApplyHitNPC applyHitNPC=null;
-			InitializeActions(ref applyStats,ref applyHitNPC);
+			Initialize(ref _itemType,ref applyStats,ref applyHitNPC);
 			if(applyStats!=null){updateStats.Add(name,applyStats);}
 			if(applyHitNPC!=null){onHitNPC.Add(name,applyHitNPC);}
-			return true;
+			return name!="Module";
 		}
 	}
 	

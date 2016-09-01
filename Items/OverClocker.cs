@@ -8,8 +8,9 @@ namespace ModularWeaponry.Items
 {
 	public class OverClocker:Module
 	{
-		public override void InitializeActions(ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
+		public override void Initialize(ref ItemType itemType,ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
 		{
+			itemType=ItemType.Weap|ItemType.Tool;
 			applyStats=delegate(Item item)
 			{
 				item.useTime=(int)(item.useTime*0.9);
@@ -20,7 +21,6 @@ namespace ModularWeaponry.Items
 		{
 			item.name="Overclocker";
 			item.toolTip="";
-			itemType=ItemType.Weap|ItemType.Tool;
 			
 			item.width=item.height=16;
 		}

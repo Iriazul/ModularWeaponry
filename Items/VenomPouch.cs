@@ -8,8 +8,9 @@ namespace ModularWeaponry.Items
 {
 	public class VenomPouch:Module
 	{
-		public override void InitializeActions(ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
+		public override void Initialize(ref ItemType itemType,ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
 		{
+			itemType=ItemType.Weap;
 			applyHitNPC=delegate(Entity attacker,NPC npc)
 			{
 				npc.AddBuff(BuffID.Venom,600);
@@ -19,7 +20,6 @@ namespace ModularWeaponry.Items
 		{
 			item.name="Venom Pouch";
 			item.toolTip="";
-			itemType=ItemType.Weap;
 			
 			item.width=item.height=16;
 		}
