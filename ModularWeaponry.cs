@@ -96,10 +96,10 @@ namespace ModularWeaponry
 
 							if (Main.mouseLeftRelease && Main.mouseLeft)
 							{
-								if (Main.mouseItem.type == 0 || (Main.mouseItem.IsModule()&&((item.GetTypes()&Main.mouseItem.GetTypes())>0)))
+								if(Main.mouseItem.type==0||item.CanEquipModule(Main.mouseItem))
 								{
-									ItemSlot.LeftClick(itemModules, 0, i);
-									item.UpdateStats(itemModules);
+									ItemSlot.LeftClick(itemModules,0,i);
+									item.UpdateStats(itemModules.ToTypeArray());
 								}
 							}
 							ItemSlot.MouseHover(itemModules, 0, i);
@@ -143,10 +143,9 @@ namespace ModularWeaponry
 
 				if (Main.mouseLeftRelease && Main.mouseLeft)
 				{
-					if (Main.mouseItem.type==0||((Main.mouseItem.GetTypes()>0)&&!Main.mouseItem.IsModule()))
+					if (Main.mouseItem.type==0||Main.mouseItem.IsCompatible())
 					{
 						ItemSlot.LeftClick(ref item, 0);
-						//item.UpdateStats(itemModules);
 					}
 				}
 				ItemSlot.MouseHover(ref item, 0);
@@ -162,51 +161,77 @@ namespace ModularWeaponry
 			return item.modItem is Module;
 		}
 		
-		public static void UpdateStats(this Item item,Item[] itemModules)
+		public static bool IsCompatible(this Item item)
+		{
+			return item.GetTypes()!=0&&!item.IsModule();
+		}
+		
+		public static bool CanEquipModule(this Item item,Item module)
+		{
+			return module.IsModule()&&((item.GetTypes()&module.GetTypes())!=0);
+		}
+		
+		public static ushort[] ToTypeArray(this Item[] items)
+		{
+			ushort[] array=new ushort[items.Length];
+			for(byte i=0;i<items.Length;i++){array[i]=items!=null?(ushort)items[i].type:(ushort)0;}
+			return array;
+		}
+		
+		public static void UpdateStats(this Item item,ushort[] modules)
 		{
 			Item temp=item.Clone();
 			item.SetDefaults(item.type);
 			item.Prefix(temp.prefix);
 			item.GetModInfo<IInfo>(ModularWeaponry.mod).modules=temp.GetModInfo<IInfo>(ModularWeaponry.mod).modules;
-			foreach(Item module in itemModules)
+			for(byte i=0;i<modules.Length;i++)
 			{
-				if(module.type>0)
+				if(modules[i]!=0)
 				{
-					ApplyStats applyStats;
-					if(Module.updateStats.TryGetValue(Main.itemName[module.type],out applyStats))
+					Stats stats;
+					if(Module.updateStats.TryGetValue(Main.itemName[modules[i]],out stats))
 					{
-						applyStats(item);
+						byte quantity=1;
+						for(byte i2=(byte)(i+1);i2<modules.Length;i2++)
+						{
+							if(modules[i2]==modules[i])
+							{
+								quantity++;
+								modules[i2]=0;
+							}
+						}
+						stats(item,quantity);
 					}
 				}
 			}
 		}
 		
-		public static ItemType GetTypes(this Item item)
+		public static IType GetTypes(this Item item)
 		{
-			if(item.IsModule()){return((Module)item.modItem).GetItemType();}
-			ItemType r=ItemType.None;
-			if(item.melee)			{r|=ItemType.Melee;}
-			if(item.ranged)			{r|=ItemType.Range;}
-			if(item.magic)			{r|=ItemType.Magic;}
+			if(item.IsModule()){return((Module)item.modItem).GetIType();}
+			IType r=IType.None;
+			if(item.melee)			{r|=IType.Melee;}
+			if(item.ranged)			{r|=IType.Range;}
+			if(item.magic)			{r|=IType.Magic;}
 			if(item.useStyle==5)
 			{
-				if(item.pick>0)		{r|=ItemType.Drill;}
-				if(item.axe>0)		{r|=ItemType.Saw;}
-				if(item.hammer>0)	{r|=ItemType.Jack;}
+				if(item.pick>0)		{r|=IType.Drill;}
+				if(item.axe>0)		{r|=IType.Saw;}
+				if(item.hammer>0)	{r|=IType.Jack;}
 			}
 			else
 			{
-				if(item.pick>0)		{r|=ItemType.Pick;}
-				if(item.axe>0)		{r|=ItemType.Axe;}
-				if(item.hammer>0)	{r|=ItemType.Hammer;}
+				if(item.pick>0)		{r|=IType.Pick;}
+				if(item.axe>0)		{r|=IType.Axe;}
+				if(item.hammer>0)	{r|=IType.Hammer;}
 			}
-			if(item.headSlot>-1)	{r|=ItemType.Head;}
-			if(item.bodySlot>-1)	{r|=ItemType.Chest;}
-			if(item.legSlot>-1)		{r|=ItemType.Legs;}
-			//if(item.)		{r|=ItemType.Wings;}
-			if(item.accessory)		{r|=ItemType.Accessory;}
-			if(item.createTile>-1)	{r|=ItemType.Tile;}
-			if(item.createWall>-1)	{r|=ItemType.Wall;}
+			if(item.headSlot>-1)	{r|=IType.Head;}
+			if(item.bodySlot>-1)	{r|=IType.Chest;}
+			if(item.legSlot>-1)		{r|=IType.Legs;}
+			//if(item.)		{r|=IType.Wings;}
+			if(item.accessory)		{r|=IType.Accessory;}
+			if(item.createTile>-1)	{r|=IType.Tile;}
+			if(item.createWall>-1)	{r|=IType.Wall;}
 			return r;
 		}
 	}

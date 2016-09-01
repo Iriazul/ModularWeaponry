@@ -68,52 +68,38 @@ namespace ModularWeaponry
 				IInfo info = item.GetModInfo<IInfo>(mod);
 				string[] splitModules = reader.ReadString().Split(';');
 				info.modules = new ushort[splitModules.Length-1];
-				Item[] itemModules=new Item[splitModules.Length-1];
 				for(byte i=0;i<info.modules.Length;++i)
 				{
 					info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
-					ModItem temp=mod.GetItem(splitModules[i]);
-					itemModules[i]=temp!=null?temp.item:new Item();
 				}
-				item.UpdateStats(itemModules);
+				item.UpdateStats((ushort[])info.modules.Clone());
 			}
 			catch(Exception e){}
 		}
 		
-		/*public override bool Shoot(Item item,Player player,ref Vector2 position,ref float speedX,ref float speedY,ref int type,ref int damage,ref float knockBack)
-		{
-			IInfo itemInfo=player.inventory[player.selectedItem].GetModInfo<IInfo>(mod);
-			if(itemInfo!=null)
-			{
-				Stack<ushort> temp=new Stack<ushort>();
-				foreach(ushort module in itemInfo.modules)
-				{
-					Main.NewText("Apply?");
-					if((module!=0)&&Module.onHitNPC.ContainsKey(Main.itemName[module]))
-					{
-						Main.NewText("Applied");
-						temp.Push(module);
-					}
-				}
-				if(temp.Count>0)
-				{
-					GProjectile.hitEffectForNextProjectile=temp;
-				}
-			}
-			return true;
-		}*/
-		
 		public override void OnHitNPC(Item item,Player player,NPC npc,int damage,float knockBack,bool crit)
 		{
-			IInfo info=item.GetModInfo<IInfo>(mod);
-			if(info.modules!=null)
+			ushort[] modules=(ushort[])item.GetModInfo<IInfo>(mod).modules.Clone();
+			if(modules!=null)
 			{
-				foreach(ushort type in info.modules)
+				for(byte i=0;i<modules.Length;i++)
 				{
-					ApplyHitNPC applyHitNPC;
-					if(Module.onHitNPC.TryGetValue(Main.itemName[type],out applyHitNPC))
+					if(modules[i]!=0)
 					{
-						applyHitNPC(player,npc);
+						HitNPC hitNPC;
+						if(Module.onHitNPC.TryGetValue(Main.itemName[modules[i]],out hitNPC))
+						{
+							byte quantity=1;
+							for(byte i2=(byte)(i+1);i2<modules.Length;i++)
+							{
+								if(modules[i2]==modules[i])
+								{
+									quantity++;
+									modules[i2]=0;
+								}
+							}
+							hitNPC(player,npc,quantity);
+						}
 					}
 				}
 			}
@@ -122,16 +108,6 @@ namespace ModularWeaponry
 	
 	public class GProjectile:GlobalProjectile
 	{
-		/*public static Stack<ushort> hitEffectForNextProjectile;
-		public override void SetDefaults(Projectile projectile)
-		{
-			if(hitEffectForNextProjectile!=null)
-			{
-				PInfo projInfo=projectile.GetModInfo<PInfo>(mod);
-				projInfo.hitEffects=hitEffectForNextProjectile;
-				hitEffectForNextProjectile=null;
-			}
-		}*/
 		public override bool PreAI(Projectile projectile)
 		{
 			PInfo projInfo=projectile.GetModInfo<PInfo>(mod);
@@ -152,14 +128,27 @@ namespace ModularWeaponry
 		}
 		public override void OnHitNPC(Projectile projectile,NPC npc,int damage,float knockback,bool crit)
 		{
-			PInfo info=projectile.GetModInfo<PInfo>(mod);
-			if(info.hitEffects!=null)
+			ushort[] hitEffects=projectile.GetModInfo<PInfo>(mod).hitEffects;
+			if(hitEffects!=null)
 			{
-				foreach(ushort type in info.hitEffects)
+				for(byte i=0;i<hitEffects.Length;i++)
 				{
-					if(type!=0&&Module.onHitNPC.ContainsKey(Main.itemName[type]))
+					if(hitEffects[i]!=0)
 					{
-						Module.onHitNPC[Main.itemName[type]](projectile,npc);
+						HitNPC hitNPC;
+						if(Module.onHitNPC.TryGetValue(Main.itemName[hitEffects[i]],out hitNPC))
+						{
+							byte quantity=1;
+							for(byte i2=(byte)(i+1);i<hitEffects.Length;i++)
+							{
+								if(hitEffects[i2]==hitEffects[i])
+								{
+									quantity++;
+									hitEffects[i2]=0;
+								}
+							}
+							hitNPC(projectile,npc,quantity);
+						}
 					}
 				}
 			}

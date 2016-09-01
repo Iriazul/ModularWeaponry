@@ -8,13 +8,12 @@ namespace ModularWeaponry.Items
 {
 	public class Circuit:Module
 	{
-		public static ItemType itemType=ItemType.Weap;
-		public override void Initialize(ref ItemType itemType,ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
+		public override void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC)
 		{
-			itemType=ItemType.Weap;
-			applyHitNPC=delegate(Entity attacker,NPC npc)
+			iType=IType.Weap;
+			hitNPC=delegate(Entity attacker,NPC npc,byte quantity)
 			{
-				npc.AddBuff(BuffID.Electrified,600);
+				npc.AddBuff(BuffID.Electrified,120*quantity);
 			};
 		}
 		public override void SetDefaults()
@@ -26,13 +25,16 @@ namespace ModularWeaponry.Items
 	}
 	public class OverClocker:Module
 	{
-		public override void Initialize(ref ItemType itemType,ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
+		public override void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC)
 		{
-			itemType=ItemType.Weap|ItemType.Tool;
-			applyStats=delegate(Item item)
+			iType=IType.Weap|IType.Tool;
+			stats=delegate(Item item,byte quantity)
 			{
-				item.useTime=(int)(item.useTime*0.9);
-				item.useAnimation=(int)(item.useAnimation*0.9);
+				float multiplier=(float)Math.Pow(0.9f,quantity);
+				item.useTime=(int)(item.useTime*multiplier);
+				item.useAnimation=(int)(item.useAnimation*multiplier);
+				if(item.useTime<1){item.useTime=1;}
+				if(item.useAnimation<1){item.useAnimation=1;}
 			};
 		}
 		public override void SetDefaults()
@@ -44,12 +46,12 @@ namespace ModularWeaponry.Items
 	}
 	public class SmallDamageModule:Module
 	{
-		public override void Initialize(ref ItemType itemType,ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
+		public override void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC)
 		{
-			itemType=ItemType.Weap|ItemType.Tool;
-			applyStats=delegate(Item item)
+			iType=IType.Weap|IType.Tool;
+			stats=delegate(Item item,byte quantity)
 			{
-				item.damage=(int)(item.damage*1.1+1);
+				item.damage=(int)Math.Ceiling(item.damage*(1+0.05*quantity));
 			};
 		}
 		public override void SetDefaults()
@@ -61,12 +63,12 @@ namespace ModularWeaponry.Items
 	}
 	public class VenomPouch:Module
 	{
-		public override void Initialize(ref ItemType itemType,ref ApplyStats applyStats,ref ApplyHitNPC applyHitNPC)
+		public override void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC)
 		{
-			itemType=ItemType.Weap;
-			applyHitNPC=delegate(Entity attacker,NPC npc)
+			iType=IType.Weap;
+			hitNPC=delegate(Entity attacker,NPC npc,byte quantity)
 			{
-				npc.AddBuff(BuffID.Venom,600);
+				npc.AddBuff(BuffID.Venom,120*quantity);
 			};
 		}
 		public override void SetDefaults()
