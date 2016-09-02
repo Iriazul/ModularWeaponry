@@ -181,9 +181,9 @@ namespace ModularWeaponry
 			IInfo info=item.GetModInfo<IInfo>(ModularWeaponry.mod);
 			info.modules=temp.GetModInfo<IInfo>(ModularWeaponry.mod).modules;
 			info.UpdateIInfo();
-			foreach(ModuleData moduleData in info.compact)
+			foreach(ModuleData module in info.compact)
 			{
-				Module.updateStats[moduleData.type](item,moduleData.level);
+				Module.updateStats[module.type](item,module.level);
 			}
 		}
 		

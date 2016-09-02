@@ -50,14 +50,7 @@ namespace ModularWeaponry
 			string writeString="";
 			for(byte i=0;i<info.modules.Length;++i)
 			{
-				if(info.modules[i]!=0)
-				{
-					writeString+=Main.itemName[info.modules[i]]+";";
-				}
-				else
-				{
-					writeString+=" ;";
-				}
+				writeString+=Main.itemName[info.modules[i]]+";";
 			}
 			writer.Write(writeString);
 		}
@@ -78,14 +71,26 @@ namespace ModularWeaponry
 			catch(Exception e){Main.NewText(e.Message);}
 		}
 		
-		public override void OnHitNPC(Item item,Player player,NPC npc,int damage,float knockBack,bool crit)
+		public override void UpdateEquip(Item item,Player player)
 		{
 			Stack<ModuleData> compact=item.GetModInfo<IInfo>(mod).compact;
 			if(compact!=null)
 			{
-				foreach(ModuleData moduleData in compact)
+				foreach(ModuleData module in compact)
 				{
-					Module.onHitEffect[moduleData.type](player,npc,moduleData.level);
+					Module.updateEquip[module.type](item,player,module.level);
+				}
+			}
+		}
+		
+		public override void OnHitNPC(Item item,Player player,NPC npc,int damage,float knockBack,bool crit)//For melee weapons
+		{
+			Stack<ModuleData> compact=item.GetModInfo<IInfo>(mod).compact;
+			if(compact!=null)
+			{
+				foreach(ModuleData module in compact)
+				{
+					Module.onHitEffect[module.type](player,npc,module.level);
 				}
 			}
 		}
@@ -111,14 +116,14 @@ namespace ModularWeaponry
 			}
 			return true;
 		}
-		public override void OnHitNPC(Projectile projectile,NPC npc,int damage,float knockback,bool crit)
+		public override void OnHitNPC(Projectile projectile,NPC npc,int damage,float knockback,bool crit)//For projectile based weapons
 		{
 			Stack<ModuleData> hitEffects=projectile.GetModInfo<PInfo>(mod).hitEffects;
 			if(hitEffects!=null)
 			{
-				foreach(ModuleData moduleData in hitEffects)
+				foreach(ModuleData module in hitEffects)
 				{
-					Module.onHitEffect[moduleData.type](projectile,npc,moduleData.level);
+					Module.onHitEffect[module.type](projectile,npc,module.level);
 				}
 			}
 		}

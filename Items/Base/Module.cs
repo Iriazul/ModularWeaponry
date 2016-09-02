@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -19,32 +20,24 @@ namespace ModularWeaponry.Items.Base
 		
 		public IType iType=IType.None;
 		
-		public virtual void Initialize(){}//(ref IType iType,ref Stats stats,ref Equip equip,ref HitNPC hitNPC){}
-		
+		public virtual void Initialize(){}
 		public virtual void UpdateStats(Item item,byte level){}
 		public virtual void UpdateEquip(Item item,Player player,byte level){}
 		public virtual void OnHitEffect(Entity attacker,NPC npc,byte level){}
 		
 		public override bool Autoload(ref string name,ref string texture,IList<EquipType> equips)
 		{
-			if(name=="Module"){return false;}
-			//Stats stats=null;
-			//Equip equip=null;
-			//HitNPC hitNPC=null;
-			//Initialize(ref _iType,ref stats,ref equip,ref hitNPC);
-			//if(stats!=null){updateStats.Add(name,stats);}
-			//if(equip!=null){updateEquip.Add(name,equip);}
-			//if(hitNPC!=null){onHitNPC.Add(name,hitNPC);}
-			return true;
+			return name!="Module";
 		}
 		public override sealed void SetDefaults()
 		{
+			item.width=Main.itemTexture[item.type].Width;
+			item.height=Main.itemTexture[item.type].Height;
+			Initialize();
 			if(!updateStats.ContainsKey((ushort)item.type)){updateStats.Add((ushort)item.type,UpdateStats);}
 			if(!updateEquip.ContainsKey((ushort)item.type)){updateEquip.Add((ushort)item.type,UpdateEquip);}
 			if(!onHitEffect.ContainsKey((ushort)item.type)){onHitEffect.Add((ushort)item.type,OnHitEffect);}
-			Initialize();
 		}
-		
 	}
 	
 	[Flags]

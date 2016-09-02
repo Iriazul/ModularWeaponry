@@ -6,6 +6,27 @@ using ModularWeaponry.Items.Base;
 
 namespace ModularWeaponry.Items
 {
+	public class TestModule:Module
+	{
+		public static byte clock=0;
+		public override void Initialize()
+		{
+			item.name="TestModule";
+			item.toolTip="This module is to test the functionality of every hook";
+			iType=IType.Any;
+		}
+		public override void UpdateStats(Item item,byte level){Main.NewText("UpdateStats (Level:"+level+")");}
+		public override void UpdateEquip(Item item,Player player,byte level)
+		{
+			if((clock+=level)>=60)
+			{
+				Main.NewText("UpdateEquip (Level:"+level+")");
+				clock=0;
+			}
+		}
+		public override void OnHitEffect(Entity attacker,NPC npc,byte level){Main.NewText("OnHitEffect (Level:"+level+")");}
+	}
+	
 	public class Circuit:Module
 	{
 		public override void Initialize()
@@ -13,7 +34,6 @@ namespace ModularWeaponry.Items
 			item.name="Circuit";
 			item.toolTip="";
 			iType=IType.Weap;
-			item.width=item.height=16;
 		}
 		public override void OnHitEffect(Entity attacker,NPC npc,byte level)
 		{
@@ -27,7 +47,6 @@ namespace ModularWeaponry.Items
 			item.name="Overclocker";
 			item.toolTip="";
 			iType=IType.Weap|IType.Tool;
-			item.width=item.height=16;
 		}
 		public override void UpdateStats(Item item,byte level)
 		{
@@ -45,7 +64,6 @@ namespace ModularWeaponry.Items
 			item.name="Small Damage Module";
 			item.toolTip="";
 			iType=IType.Weap|IType.Tool;
-			item.width=item.height=16;
 		}
 		public override void UpdateStats(Item item,byte level)
 		{
@@ -59,7 +77,6 @@ namespace ModularWeaponry.Items
 			item.name="Toxic Salve";
 			item.toolTip="";
 			iType=IType.Weap;
-			item.width=item.height=16;
 		}
 		public override void OnHitEffect(Entity attacker,NPC npc,byte level)
 		{
