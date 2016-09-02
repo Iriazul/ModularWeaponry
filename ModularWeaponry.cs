@@ -15,18 +15,19 @@ using ModularWeaponry.Items.Base;
 
 namespace ModularWeaponry
 {
-	public class ModularWeaponry : Mod
+	public class ModularWeaponry:Mod
 	{
+		public const byte MAX_MODULES=5;
 		public static bool moduleInterfaceOpen;
 		public static ModularWeaponry mod;
 		public ModularWeaponry()
 		{
 			mod=this;
-			this.Properties = new ModProperties()
+			this.Properties=new ModProperties()
 			{
-				Autoload = true,
-				AutoloadGores = true,
-				AutoloadSounds = true
+				Autoload=true,
+				AutoloadGores=true,
+				AutoloadSounds=true
 			};
 		}
 
@@ -36,8 +37,9 @@ namespace ModularWeaponry
 
 		public override void PostDrawInterface(SpriteBatch spriteBatch)
 		{
-			if (item == null) item = new Item();
-			if (lastItem == null) lastItem = new Item();
+			//Initiallize items if neccessary
+			if(item==null)item=new Item();
+			if(lastItem==null)lastItem=new Item();
 
 			// Here we check if we're not in any UI and if the players' inventory is open.			
 			if (!Main.ingameOptionsWindow && Main.playerInventory && !Main.inFancyUI && moduleInterfaceOpen)
@@ -54,38 +56,32 @@ namespace ModularWeaponry
 					// Set the modules for the last item correctly.
 					if (lastItem.type != 0)
 					{
-						IInfo lastInfo = lastItem.GetModInfo<IInfo>(this);
-						for (int i = 0; i < itemModules.Length; ++i)
+						IInfo lastInfo=lastItem.GetModInfo<IInfo>(this);
+						for (byte i=0;i<itemModules.Length;++i)
 						{
-							lastInfo.modules[i] = (ushort)itemModules[i].type;
+							lastInfo.modules[i]=(ushort)itemModules[i].type;
 						}
 					}
-
-					try
+					
+					if(item.type!=0)
 					{
-						if (item.type > 0)
+						// If so, reset the 'itemModules' array and fill it with the appropriate items.
+						IInfo info=item.GetModInfo<IInfo>(this);
+						if(info.modules==null)
 						{
-							// If so, reset the 'itemModules' array and fill it with the appropriate items.
-							IInfo info = item.GetModInfo<IInfo>(this);
-							if (info.modules == null)
-								info.modules = new ushort[5];
-							
-							itemModules = new Item[info.modules.Length];
-							for (int i = 0; i < itemModules.Length; ++i)
-							{
-								itemModules[i] = new Item();
-								itemModules[i].SetDefaults(info.modules[i]);
-							}
+							info.modules=new ushort[MAX_MODULES];
 						}
-					}
-					catch (Exception e)
-					{
-						Main.NewText(e.Message);
+						itemModules=new Item[info.modules.Length];
+						for(int i=0;i<itemModules.Length;++i)
+						{
+							itemModules[i]=new Item();
+							itemModules[i].SetDefaults(info.modules[i]);
+						}
 					}
 				}
 
 				// If there is actually an item being modified.
-				if(item.type > 0)
+				if(item.type!=0)
 				{
 					for (int i = 0; i < itemModules.Length; ++i)
 					{
@@ -99,7 +95,8 @@ namespace ModularWeaponry
 								if(Main.mouseItem.type==0||item.CanEquipModule(Main.mouseItem))
 								{
 									ItemSlot.LeftClick(itemModules,0,i);
-									item.UpdateStats(itemModules.ToTypeArray());
+									item.GetModInfo<IInfo>(this).modules=itemModules.ToTypeArray();
+									item.UpdateModules();
 								}
 							}
 							ItemSlot.MouseHover(itemModules, 0, i);
@@ -108,16 +105,13 @@ namespace ModularWeaponry
 					}
 				}
 
-				lastItem = item;
+				lastItem=item;
 			}
 			else if (!moduleInterfaceOpen && item.type != 0)
 			{
 				// Drop the weapon if it was left in the item slot.
 				IInfo info = item.GetModInfo<IInfo>(this);
-				for(int i = 0; i < itemModules.Length; ++i)
-				{
-					info.modules[i] = (ushort)itemModules[i].type;
-				}
+				info.modules=itemModules.ToTypeArray();
 
 				for (int i = 0; i < 400; ++i)
 				{
@@ -131,8 +125,7 @@ namespace ModularWeaponry
 					}
 				}
 			}
-
-			lastItem = item;
+			lastItem=item;
 		}
 
 		private void HandleUIItem(SpriteBatch spriteBatch, ref Item item, Vector2 drawPos)
@@ -178,37 +171,25 @@ namespace ModularWeaponry
 			return array;
 		}
 		
-		public static void UpdateStats(this Item item,ushort[] modules)
+		
+		
+		public static void UpdateModules(this Item item)
 		{
 			Item temp=item.Clone();
 			item.SetDefaults(item.type);
 			item.Prefix(temp.prefix);
-			item.GetModInfo<IInfo>(ModularWeaponry.mod).modules=temp.GetModInfo<IInfo>(ModularWeaponry.mod).modules;
-			for(byte i=0;i<modules.Length;i++)
+			IInfo info=item.GetModInfo<IInfo>(ModularWeaponry.mod);
+			info.modules=temp.GetModInfo<IInfo>(ModularWeaponry.mod).modules;
+			info.UpdateIInfo();
+			foreach(ModuleData moduleData in info.compact)
 			{
-				if(modules[i]!=0)
-				{
-					Stats stats;
-					if(Module.updateStats.TryGetValue(Main.itemName[modules[i]],out stats))
-					{
-						byte quantity=1;
-						for(byte i2=(byte)(i+1);i2<modules.Length;i2++)
-						{
-							if(modules[i2]==modules[i])
-							{
-								quantity++;
-								modules[i2]=0;
-							}
-						}
-						stats(item,quantity);
-					}
-				}
+				Module.updateStats[moduleData.type](item,moduleData.level);
 			}
 		}
 		
 		public static IType GetTypes(this Item item)
 		{
-			if(item.IsModule()){return((Module)item.modItem).GetIType();}
+			if(item.IsModule()){return((Module)item.modItem).iType;}
 			IType r=IType.None;
 			if(item.melee)			{r|=IType.Melee;}
 			if(item.ranged)			{r|=IType.Range;}

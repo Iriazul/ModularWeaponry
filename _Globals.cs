@@ -70,37 +70,22 @@ namespace ModularWeaponry
 				info.modules = new ushort[splitModules.Length-1];
 				for(byte i=0;i<info.modules.Length;++i)
 				{
-					info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
+					ushort type=(ushort)mod.ItemType(splitModules[i]);
+					info.modules[i]=type;
 				}
-				item.UpdateStats((ushort[])info.modules.Clone());
+				item.UpdateModules();
 			}
-			catch(Exception e){}
+			catch(Exception e){Main.NewText(e.Message);}
 		}
 		
 		public override void OnHitNPC(Item item,Player player,NPC npc,int damage,float knockBack,bool crit)
 		{
-			ushort[] modules=(ushort[])item.GetModInfo<IInfo>(mod).modules.Clone();
-			if(modules!=null)
+			Stack<ModuleData> compact=item.GetModInfo<IInfo>(mod).compact;
+			if(compact!=null)
 			{
-				for(byte i=0;i<modules.Length;i++)
+				foreach(ModuleData moduleData in compact)
 				{
-					if(modules[i]!=0)
-					{
-						HitNPC hitNPC;
-						if(Module.onHitNPC.TryGetValue(Main.itemName[modules[i]],out hitNPC))
-						{
-							byte quantity=1;
-							for(byte i2=(byte)(i+1);i2<modules.Length;i++)
-							{
-								if(modules[i2]==modules[i])
-								{
-									quantity++;
-									modules[i2]=0;
-								}
-							}
-							hitNPC(player,npc,quantity);
-						}
-					}
+					Module.onHitEffect[moduleData.type](player,npc,moduleData.level);
 				}
 			}
 		}
@@ -113,14 +98,14 @@ namespace ModularWeaponry
 			PInfo projInfo=projectile.GetModInfo<PInfo>(mod);
 			if(projInfo.check)
 			{
+				projInfo.check=false;
 				if(projectile.friendly)
 				{
-					projInfo.check=false;
 					Player player=Main.player[projectile.owner];
 					IInfo itemInfo=player.inventory[player.selectedItem].GetModInfo<IInfo>(mod);
-					if(itemInfo.modules!=null)
+					if(itemInfo.compact!=null)
 					{
-						projInfo.hitEffects=itemInfo.modules;
+						projInfo.hitEffects=itemInfo.compact;
 					}
 				}
 			}
@@ -128,41 +113,61 @@ namespace ModularWeaponry
 		}
 		public override void OnHitNPC(Projectile projectile,NPC npc,int damage,float knockback,bool crit)
 		{
-			ushort[] hitEffects=projectile.GetModInfo<PInfo>(mod).hitEffects;
+			Stack<ModuleData> hitEffects=projectile.GetModInfo<PInfo>(mod).hitEffects;
 			if(hitEffects!=null)
 			{
-				for(byte i=0;i<hitEffects.Length;i++)
+				foreach(ModuleData moduleData in hitEffects)
 				{
-					if(hitEffects[i]!=0)
-					{
-						HitNPC hitNPC;
-						if(Module.onHitNPC.TryGetValue(Main.itemName[hitEffects[i]],out hitNPC))
-						{
-							byte quantity=1;
-							for(byte i2=(byte)(i+1);i<hitEffects.Length;i++)
-							{
-								if(hitEffects[i2]==hitEffects[i])
-								{
-									quantity++;
-									hitEffects[i2]=0;
-								}
-							}
-							hitNPC(projectile,npc,quantity);
-						}
-					}
+					Module.onHitEffect[moduleData.type](projectile,npc,moduleData.level);
 				}
 			}
 		}
 	}
-	
+		
 	public class IInfo:ItemInfo
 	{
 		public ushort[] modules;
+		public Stack<ModuleData> compact;
+		
+		public void UpdateIInfo()
+		{
+			if(this.modules==null){this.compact=null;return;}
+			ushort[] temp=(ushort[])this.modules.Clone();
+			this.compact=new Stack<ModuleData>();
+			for(byte i=0;i<temp.Length;i++)
+			{
+				if(temp[i]!=0)
+				{
+					byte level=1;
+					for(byte i2=(byte)(i+1);i2<temp.Length;i2++)
+					{
+						if(temp[i2]==temp[i])
+						{
+							level++;
+							temp[i2]=0;
+						}
+					}
+					this.compact.Push(new ModuleData(temp[i],level));
+				}
+			}
+			if(this.compact.Count==0){this.compact=null;}
+		}
+	}
+	
+	public class ModuleData
+	{
+		public ushort type;	//ID of module
+		public byte level;	//How many of that type
+		public ModuleData(ushort type,byte level)
+		{
+			this.type=type;
+			this.level=level;
+		}
 	}
 	
 	public class PInfo:ProjectileInfo
 	{
 		public bool check=true;
-		public ushort[] hitEffects;
+		public Stack<ModuleData> hitEffects;
 	}
 }

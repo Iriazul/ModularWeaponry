@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
@@ -6,29 +7,44 @@ using Terraria.ModLoader;
 
 namespace ModularWeaponry.Items.Base
 {
-	
-	public delegate void Stats(Item item,byte quantity);
-	public delegate void HitNPC(Entity attacker,NPC npc,byte quantity);
+	public delegate void Stats(Item item,byte level);
+	public delegate void Equip(Item item,Player player,byte level);
+	public delegate void HitEffect(Entity attacker,NPC npc,byte level);
 	
 	public class Module:ModItem
 	{
-		public static Dictionary<string,Stats> updateStats=new Dictionary<string,Stats>();
-		public static Dictionary<string,HitNPC> onHitNPC=new Dictionary<string,HitNPC>();
+		public static Dictionary<ushort,Stats>	updateStats=new Dictionary<ushort,Stats>();
+		public static Dictionary<ushort,Equip>	updateEquip=new Dictionary<ushort,Equip>();
+		public static Dictionary<ushort,HitEffect>	onHitEffect=new Dictionary<ushort,HitEffect>();
 		
-		private static IType _iType;
+		public IType iType=IType.None;
 		
-		public IType GetIType(){return _iType;}
-		public virtual void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC){}
+		public virtual void Initialize(){}//(ref IType iType,ref Stats stats,ref Equip equip,ref HitNPC hitNPC){}
+		
+		public virtual void UpdateStats(Item item,byte level){}
+		public virtual void UpdateEquip(Item item,Player player,byte level){}
+		public virtual void OnHitEffect(Entity attacker,NPC npc,byte level){}
 		
 		public override bool Autoload(ref string name,ref string texture,IList<EquipType> equips)
 		{
-			Stats stats=null;
-			HitNPC hitNPC=null;
-			Initialize(ref _iType,ref stats,ref hitNPC);
-			if(stats!=null){updateStats.Add(name,stats);}
-			if(hitNPC!=null){onHitNPC.Add(name,hitNPC);}
-			return name!="Module";
+			if(name=="Module"){return false;}
+			//Stats stats=null;
+			//Equip equip=null;
+			//HitNPC hitNPC=null;
+			//Initialize(ref _iType,ref stats,ref equip,ref hitNPC);
+			//if(stats!=null){updateStats.Add(name,stats);}
+			//if(equip!=null){updateEquip.Add(name,equip);}
+			//if(hitNPC!=null){onHitNPC.Add(name,hitNPC);}
+			return true;
 		}
+		public override sealed void SetDefaults()
+		{
+			if(!updateStats.ContainsKey((ushort)item.type)){updateStats.Add((ushort)item.type,UpdateStats);}
+			if(!updateEquip.ContainsKey((ushort)item.type)){updateEquip.Add((ushort)item.type,UpdateEquip);}
+			if(!onHitEffect.ContainsKey((ushort)item.type)){onHitEffect.Add((ushort)item.type,OnHitEffect);}
+			Initialize();
+		}
+		
 	}
 	
 	[Flags]

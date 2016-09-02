@@ -8,74 +8,62 @@ namespace ModularWeaponry.Items
 {
 	public class Circuit:Module
 	{
-		public override void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC)
-		{
-			iType=IType.Weap;
-			hitNPC=delegate(Entity attacker,NPC npc,byte quantity)
-			{
-				npc.AddBuff(BuffID.Electrified,120*quantity);
-			};
-		}
-		public override void SetDefaults()
+		public override void Initialize()
 		{
 			item.name="Circuit";
 			item.toolTip="";
+			iType=IType.Weap;
 			item.width=item.height=16;
+		}
+		public override void OnHitEffect(Entity attacker,NPC npc,byte level)
+		{
+			npc.AddBuff(BuffID.Electrified,120*level);
 		}
 	}
 	public class OverClocker:Module
 	{
-		public override void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC)
-		{
-			iType=IType.Weap|IType.Tool;
-			stats=delegate(Item item,byte quantity)
-			{
-				float multiplier=(float)Math.Pow(0.9f,quantity);
-				item.useTime=(int)(item.useTime*multiplier);
-				item.useAnimation=(int)(item.useAnimation*multiplier);
-				if(item.useTime<1){item.useTime=1;}
-				if(item.useAnimation<1){item.useAnimation=1;}
-			};
-		}
-		public override void SetDefaults()
+		public override void Initialize()
 		{
 			item.name="Overclocker";
 			item.toolTip="";
+			iType=IType.Weap|IType.Tool;
 			item.width=item.height=16;
+		}
+		public override void UpdateStats(Item item,byte level)
+		{
+			float multiplier=(float)Math.Pow(0.9f,level);
+			item.useTime=(int)(item.useTime*multiplier);
+			item.useAnimation=(int)(item.useAnimation*multiplier);
+			if(item.useTime<1){item.useTime=1;}
+			if(item.useAnimation<1){item.useAnimation=1;}
 		}
 	}
 	public class SmallDamageModule:Module
 	{
-		public override void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC)
-		{
-			iType=IType.Weap|IType.Tool;
-			stats=delegate(Item item,byte quantity)
-			{
-				item.damage=(int)Math.Ceiling(item.damage*(1+0.05*quantity));
-			};
-		}
-		public override void SetDefaults()
+		public override void Initialize()
 		{
 			item.name="Small Damage Module";
 			item.toolTip="";
+			iType=IType.Weap|IType.Tool;
 			item.width=item.height=16;
+		}
+		public override void UpdateStats(Item item,byte level)
+		{
+			item.damage=(int)Math.Ceiling(item.damage*(1+0.05*level));
 		}
 	}
 	public class VenomPouch:Module
 	{
-		public override void Initialize(ref IType iType,ref Stats stats,ref HitNPC hitNPC)
-		{
-			iType=IType.Weap;
-			hitNPC=delegate(Entity attacker,NPC npc,byte quantity)
-			{
-				npc.AddBuff(BuffID.Venom,120*quantity);
-			};
-		}
-		public override void SetDefaults()
+		public override void Initialize()
 		{
 			item.name="Toxic Salve";
 			item.toolTip="";
+			iType=IType.Weap;
 			item.width=item.height=16;
+		}
+		public override void OnHitEffect(Entity attacker,NPC npc,byte level)
+		{
+			npc.AddBuff(BuffID.Venom,120*level);
 		}
 	}
 }

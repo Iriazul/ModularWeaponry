@@ -24,74 +24,74 @@ namespace ModularWeaponry.Tiles
 			adjTiles = new int[]{ TileID.WorkBenches };
 		}
 
-        public override void MouseOver(int i, int j)
-        {
-            Player player = Main.player[Main.myPlayer];
-       
-            player.showItemIcon2 = mod.ItemType("ModularWorkbench");
+		public override void MouseOver(int i, int j)
+		{
+			Player player = Main.player[Main.myPlayer];
+	   
+			player.showItemIcon2 = mod.ItemType("ModularWorkbench");
 
-            player.noThrow = 2;
-            player.showItemIcon = true;
-        }
-        public override void RightClick(int i, int j)
-        {
-            int left, top;
-            this.GetBase(i, j, out left, out top);
+			player.noThrow = 2;
+			player.showItemIcon = true;
+		}
+		public override void RightClick(int i, int j)
+		{
+			int left, top;
+			this.GetBase(i, j, out left, out top);
 
-            Main.mouseRightRelease = false;
+			Main.mouseRightRelease = false;
 
-            Player player = Main.player[Main.myPlayer];
+			Player player = Main.player[Main.myPlayer];
 
-            if (player.sign >= 0)
-            {
-                Main.PlaySound(11, -1, -1, 1);
-                player.sign = -1;
-                Main.editSign = false;
-                Main.npcChatText = "";
-            }
-            else if (player.chest >= 0)
-            {
-                Main.PlaySound(11, -1, -1, 1);
-                player.chest = -1;
-                Recipe.FindRecipes();
-            }
+			if (player.sign >= 0)
+			{
+				Main.PlaySound(11, -1, -1, 1);
+				player.sign = -1;
+				Main.editSign = false;
+				Main.npcChatText = "";
+			}
+			else if (player.chest >= 0)
+			{
+				Main.PlaySound(11, -1, -1, 1);
+				player.chest = -1;
+				Recipe.FindRecipes();
+			}
 
-            MPlayer mp = player.GetModPlayer<MPlayer>(mod);
+			MPlayer mp = player.GetModPlayer<MPlayer>(mod);
 
-            if (ModularWeaponry.moduleInterfaceOpen)
-            {
-                ModularWeaponry.moduleInterfaceOpen = false;
-                mp.workbenchX = mp.workbenchY = -1;                
-                return;
-            }
+			if (ModularWeaponry.moduleInterfaceOpen)
+			{
+				ModularWeaponry.moduleInterfaceOpen = false;
+				mp.workbenchX = mp.workbenchY = -1;				
+				return;
+			}
 
-            ModularWeaponry.moduleInterfaceOpen = true;
-            Main.playerInventory = true;
-            mp.workbenchX = left;
-            mp.workbenchY = top;
+			ModularWeaponry.moduleInterfaceOpen = true;
+			Main.playerInventory = true;
+			mp.workbenchX = left;
+			mp.workbenchY = top;
 
-            Main.npcChatText = "";
-            Main.PlaySound(10, -1, -1, 1);
-        }
+			Main.npcChatText = "";
+			Main.PlaySound(10, -1, -1, 1);
+		}
 
-        public override void KillMultiTile(int i, int j, int frameX, int frameY)
+		public override void KillMultiTile(int i, int j, int frameX, int frameY)
 		{
 			Item.NewItem(i * 16, j * 16, 32, 16, mod.ItemType("ModularWorkbench"));
-        }
+		}
 
-        private void GetBase(int x, int y, out int left, out int top)
-        {
-            left = x;
-            top = y;
-            Tile tile = Main.tile[x, y];
-            if (tile.frameX % 36 != 0)
-            {
-                left--;
-            }
-            if (tile.frameY != 0)
-            {
-                top--;
-            }
-        }
-    }
+		private void GetBase(int x, int y, out int left, out int top)
+		{
+			left = x;
+			top = y;
+			Tile tile = Main.tile[x, y];
+			if (tile.frameX % 36 != 0)
+			{
+				left--;
+			}
+			if (tile.frameY != 0)
+			{
+				top--;
+			}
+		}
+	}
 }
