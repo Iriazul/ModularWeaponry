@@ -17,7 +17,6 @@ namespace ModularWeaponry
 		{
 			tempItemInfo=item.GetModInfo<IInfo>(mod);
 		}
-		
 		public override void PostReforge(Item item)
 		{
 			if(tempItemInfo!=null)
@@ -43,7 +42,6 @@ namespace ModularWeaponry
 			}
 			return false;
 		}
-
 		public override void SaveCustomData(Item item,BinaryWriter writer)
 		{
 			IInfo info=item.GetModInfo<IInfo>(mod);
@@ -56,19 +54,32 @@ namespace ModularWeaponry
 		}
 		public override void LoadCustomData(Item item, BinaryReader reader)
 		{
-			try
+			string[] splitModules=reader.ReadString().Split(';');
+			if(splitModules.Length<=1){return;}
+			IInfo info=item.GetModInfo<IInfo>(mod);
+			info.modules=new ushort[splitModules.Length-1];
+			for(byte i=0;i<info.modules.Length;++i)
 			{
-				IInfo info = item.GetModInfo<IInfo>(mod);
-				string[] splitModules = reader.ReadString().Split(';');
-				info.modules = new ushort[splitModules.Length-1];
-				for(byte i=0;i<info.modules.Length;++i)
-				{
-					ushort type=(ushort)mod.ItemType(splitModules[i]);
-					info.modules[i]=type;
-				}
-				item.UpdateModules();
+				info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
 			}
-			catch(Exception e){Main.NewText(e.Message);}
+			item.UpdateModules();
+		}
+		
+		public override void ModifyTooltips(Item item,List<TooltipLine> tooltips)
+		{
+			IInfo info=item.GetModInfo<IInfo>(mod);
+			if(info.compact!=null)
+			{
+				TooltipLine moduleToolTip=new TooltipLine(mod,"Modules","[Modules]");
+				moduleToolTip.overrideColor=Color.Gray;
+				tooltips.Add(moduleToolTip);
+				foreach(ModuleData module in info.compact)
+				{
+					TooltipLine line=new TooltipLine(mod,"",Main.itemName[module.type]+" [Level "+module.level+"]");
+					line.overrideColor=Module.moduleColor[module.type];
+					tooltips.Add(line);
+				}
+			}
 		}
 		
 		public override void UpdateEquip(Item item,Player player)

@@ -207,12 +207,13 @@ namespace ModularWeaponry
 				if(item.hammer>0)	{r|=IType.Hammer;}
 			}
 			if(item.headSlot>-1)	{r|=IType.Head;}
-			if(item.bodySlot>-1)	{r|=IType.Chest;}
+			if(item.bodySlot>-1)	{r|=IType.Body;}
 			if(item.legSlot>-1)		{r|=IType.Legs;}
 			//if(item.)		{r|=IType.Wings;}
 			if(item.accessory)		{r|=IType.Accessory;}
 			if(item.createTile>-1)	{r|=IType.Tile;}
 			if(item.createWall>-1)	{r|=IType.Wall;}
+			if(((r&IType.Damage)!=0)&&!((r&IType.Tool)!=0)){r|=IType.Weap;}
 			return r;
 		}
 	}
