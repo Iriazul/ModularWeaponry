@@ -52,7 +52,7 @@ namespace ModularWeaponry.Items
 			item.damage=(int)Math.Ceiling(item.damage*(1+0.05*level));
 		}
 	}
-	public class VenomPouch:Module
+	public class ToxicSalve:Module
 	{
 		public override void Initialize()
 		{
