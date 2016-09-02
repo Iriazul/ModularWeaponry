@@ -73,7 +73,7 @@ namespace ModularWeaponry.Items
 		}
 		public override void SetDefaults()
 		{
-			item.name="Venom Pouch";
+			item.name="Toxic Salve";
 			item.toolTip="";
 			item.width=item.height=16;
 		}
