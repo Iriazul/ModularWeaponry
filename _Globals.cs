@@ -89,8 +89,8 @@ namespace ModularWeaponry
 			{
 				foreach(ModuleData module in compact)
 				{
-					Module.updateEquip[module.type](item,player,module.level);
-				}
+                    try { Module.updateEquip[module.type](item, player, module.level); } catch (Exception e) { Main.NewText("Exception in UpdateEquip: " + e.Message); }
+                }
 			}
 		}
 		
