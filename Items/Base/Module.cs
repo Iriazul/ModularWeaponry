@@ -11,13 +11,15 @@ namespace ModularWeaponry.Items.Base
 {
 	public delegate void Stats(Item item,byte level);
 	public delegate void Equip(Item item,Player player,byte level);
-	public delegate void HitEffect(Entity attacker,NPC npc,byte level);
+	public delegate bool ShootProj(Item item,Player player,Projectile projectile,byte level);
+	public delegate void HitEffect(Item item,Entity attacker,NPC npc,byte level);
 	
 	public class Module:ModItem
 	{
-		public static Dictionary<ushort,Color?>	moduleColor=new Dictionary<ushort,Color?>();
-		public static Dictionary<ushort,Stats>	updateStats=new Dictionary<ushort,Stats>();
-		public static Dictionary<ushort,Equip>	updateEquip=new Dictionary<ushort,Equip>();
+		public static Dictionary<ushort,Color?>		moduleColor=new Dictionary<ushort,Color?>();
+		public static Dictionary<ushort,Stats>		updateStats=new Dictionary<ushort,Stats>();
+		public static Dictionary<ushort,Equip>		updateEquip=new Dictionary<ushort,Equip>();
+		public static Dictionary<ushort,ShootProj>	onShootProj=new Dictionary<ushort,ShootProj>();
 		public static Dictionary<ushort,HitEffect>	onHitEffect=new Dictionary<ushort,HitEffect>();
 		
 		public IType iType=IType.None;
@@ -27,7 +29,8 @@ namespace ModularWeaponry.Items.Base
 		public virtual void Initialize(){}
 		public virtual void UpdateStats(Item item,byte level){}
 		public virtual void UpdateEquip(Item item,Player player,byte level){}
-		public virtual void OnHitEffect(Entity attacker,NPC npc,byte level){}
+		public virtual bool OnShootProj(Item item,Player player,Projectile projectile,byte level){return true;}
+		public virtual void OnHitEffect(Item item,Entity attacker,NPC npc,byte level){}
 		
 		public override bool Autoload(ref string name,ref string texture,IList<EquipType> equips)
 		{
@@ -42,17 +45,18 @@ namespace ModularWeaponry.Items.Base
 			if(!moduleColor.ContainsKey((ushort)item.type)){moduleColor.Add((ushort)item.type,ModuleColor);}
 			if(!updateStats.ContainsKey((ushort)item.type)){updateStats.Add((ushort)item.type,UpdateStats);}
 			if(!updateEquip.ContainsKey((ushort)item.type)){updateEquip.Add((ushort)item.type,UpdateEquip);}
+			if(!onShootProj.ContainsKey((ushort)item.type)){onShootProj.Add((ushort)item.type,OnShootProj);}
 			if(!onHitEffect.ContainsKey((ushort)item.type)){onHitEffect.Add((ushort)item.type,OnHitEffect);}
 		}
 		public string GetCompatibilityString()
 		{
-			string r="";
-			if(iType.HasFlag(IType.Any)){r+="\nAnything";}
+			string r="[Compatibilities]";
+			if(iType.HasFlag(IType.Any)){r+="\nAll items";}
 			else
 			{
 				if(iType.HasFlag(IType.Weap))
 				{
-					if(iType.HasFlag(IType.Damage)){r+="\nAll weapons";}
+					if(iType.HasFlag(IType.Damage)||((iType&IType.Damage)==0)){r+="\nAll weapons";}
 					else
 					{
 						if(iType.HasFlag(IType.Melee)){r+="\nMelee weapons";}
@@ -91,7 +95,7 @@ namespace ModularWeaponry.Items.Base
 					if(iType.HasFlag(IType.Accessory)){r+="\nAll accessories";}
 				}
 			}
-			return r==""?"":"Compatibilities:"+r;
+			return r;
 		}
 	}
 	

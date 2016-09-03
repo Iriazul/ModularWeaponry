@@ -101,7 +101,7 @@ namespace ModularWeaponry
 			{
 				foreach(ModuleData module in compact)
 				{
-					Module.onHitEffect[module.type](player,npc,module.level);
+					Module.onHitEffect[module.type](item,player,npc,module.level);
 				}
 			}
 		}
@@ -121,7 +121,18 @@ namespace ModularWeaponry
 					IInfo itemInfo=player.inventory[player.selectedItem].GetModInfo<IInfo>(mod);
 					if(itemInfo.compact!=null)
 					{
-						projInfo.hitEffects=itemInfo.compact;
+						projInfo.modules=itemInfo.compact;
+						projInfo.item=player.inventory[player.selectedItem];
+						bool killProjectile=false;
+						foreach(ModuleData module in itemInfo.compact)
+						{
+							if(!Module.onShootProj[module.type](projInfo.item,player,projectile,module.level)){killProjectile=true;}
+						}
+						if(killProjectile)
+						{
+							projectile.hide=true;
+							projectile.active=false;
+						}
 					}
 				}
 			}
@@ -129,12 +140,12 @@ namespace ModularWeaponry
 		}
 		public override void OnHitNPC(Projectile projectile,NPC npc,int damage,float knockback,bool crit)//For projectile based weapons
 		{
-			Stack<ModuleData> hitEffects=projectile.GetModInfo<PInfo>(mod).hitEffects;
-			if(hitEffects!=null)
+			PInfo info=projectile.GetModInfo<PInfo>(mod);
+			if(info.modules!=null)
 			{
-				foreach(ModuleData module in hitEffects)
+				foreach(ModuleData module in info.modules)
 				{
-					Module.onHitEffect[module.type](projectile,npc,module.level);
+					Module.onHitEffect[module.type](info.item,projectile,npc,module.level);
 				}
 			}
 		}
@@ -184,6 +195,7 @@ namespace ModularWeaponry
 	public class PInfo:ProjectileInfo
 	{
 		public bool check=true;
-		public Stack<ModuleData> hitEffects;
+		public Stack<ModuleData> modules;
+		public Item item;
 	}
 }
