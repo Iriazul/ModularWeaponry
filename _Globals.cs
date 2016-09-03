@@ -84,13 +84,16 @@ namespace ModularWeaponry
 		
 		public override void UpdateEquip(Item item,Player player)
 		{
-			Stack<ModuleData> compact=item.GetModInfo<IInfo>(mod).compact;
-			if(compact!=null)
+			if(item.type!=0)
 			{
-				foreach(ModuleData module in compact)
+				IInfo info=item.GetModInfo<IInfo>(mod);
+				if(info!=null&&info.compact!=null)
 				{
-                    try { Module.updateEquip[module.type](item, player, module.level); } catch (Exception e) { Main.NewText("Exception in UpdateEquip: " + e.Message); }
-                }
+					foreach(ModuleData module in info.compact)
+					{
+						Module.updateEquip[module.type](item,player,module.level);
+					}
+				}
 			}
 		}
 		
