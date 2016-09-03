@@ -98,8 +98,7 @@ namespace ModularWeaponry.Items
             item.damage = (int)Math.Ceiling(item.damage * (1 + 0.15 * level));
         }
     }
-    public class ToxicSalve:Module
-=======
+
 	public class Talisman:Module
 	{
 		public override void Initialize()
@@ -163,7 +162,6 @@ namespace ModularWeaponry.Items
 		}
 	}
 	public class ToxicSalve:Module
->>>>>>> de46db490a3221a509e5cfb4b5b70739b7c79dbd
 	{
 		public override void Initialize()
 		{
@@ -177,4 +175,25 @@ namespace ModularWeaponry.Items
 			npc.AddBuff(BuffID.Venom,120*level);
 		}
 	}
+    public class VampiricCharm : Module
+    {
+        public override void Initialize()
+        {
+            item.name = "Vampiric Charm";
+            item.toolTip = "Converts damage dealt to health";
+            iType = IType.Weap;
+            ModuleColor = Color.YellowGreen;
+        }
+        public override void OnHitEffect(Item item, Entity attacker, NPC npc, byte level)
+        {
+            if (attacker is Projectile)
+            {
+                player.health += (0.1 * projectile.damage) * (3 * log(level) + 1);
+            }
+            else
+            {
+                player.health += (0.1 * item.damage) * (3 * log(level) + 1);
+            }
+        }
+    }
 }
