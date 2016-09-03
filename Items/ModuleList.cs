@@ -83,7 +83,35 @@ namespace ModularWeaponry.Items
 			item.damage=(int)Math.Ceiling(item.damage*(1+0.05*level));
 		}
 	}
-	public class ToxicSalve:Module
+    public class DamageModule : Module
+    {
+        public override void Initialize()
+        {
+            item.name = "Damage Module";
+            item.toolTip = "";
+            iType = IType.Weap | IType.Tool;
+            ModuleColor = Color.Red;
+        }
+        public override void UpdateStats(Item item, byte level)
+        {
+            item.damage = (int)Math.Ceiling(item.damage * (1 + 0.1 * level));
+        }
+    }
+    public class SuperiorDamageModule : Module
+    {
+        public override void Initialize()
+        {
+            item.name = "Superior Damage Module";
+            item.toolTip = "";
+            iType = IType.Weap | IType.Tool;
+            ModuleColor = Color.Red;
+        }
+        public override void UpdateStats(Item item, byte level)
+        {
+            item.damage = (int)Math.Ceiling(item.damage * (1 + 0.15 * level));
+        }
+    }
+    public class ToxicSalve:Module
 	{
 		public override void Initialize()
 		{
