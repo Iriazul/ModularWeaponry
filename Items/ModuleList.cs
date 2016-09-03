@@ -69,7 +69,6 @@ namespace ModularWeaponry.Items
 			item.damage=(int)Math.Ceiling(item.damage*(1+0.05*level));
 		}
 	}
-<<<<<<< HEAD
     public class DamageModule : Module
     {
         public override void Initialize()
@@ -188,11 +187,11 @@ namespace ModularWeaponry.Items
         {
             if (attacker is Projectile)
             {
-                player.health += (0.1 * projectile.damage) * (3 * log(level) + 1);
+                Main.player[((Projectile)attacker).owner].statLife += (int)((0.1 * ((Projectile)attacker).damage) * (3 * Math.Log(level) + 1));
             }
             else
             {
-                player.health += (0.1 * item.damage) * (3 * log(level) + 1);
+                Main.player[((Projectile)attacker).owner].statLife += (int)((0.1 * ((Projectile)attacker).damage) * (3 * Math.Log(level) + 1));
             }
         }
     }
