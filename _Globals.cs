@@ -67,10 +67,11 @@ namespace ModularWeaponry
 		
 		public override void ModifyTooltips(Item item,List<TooltipLine> tooltips)
 		{
+			if(item.IsModule()){tooltips[0].overrideColor=Module.moduleColor[Module.moduleData[(ushort)item.type].type];return;}
 			IInfo info=item.GetModInfo<IInfo>(mod);
 			if(info!=null&&info.compact!=null)
 			{
-				TooltipLine moduleToolTip=new TooltipLine(mod,"Modules","[Modules]");
+				TooltipLine moduleToolTip=new TooltipLine(mod,"","--[Modules]--");
 				moduleToolTip.overrideColor=Color.Gray;
 				tooltips.Add(moduleToolTip);
 				foreach(ModuleData module in info.compact)
@@ -168,20 +169,25 @@ namespace ModularWeaponry
 			{
 				if(temp[i]!=0)
 				{
-					byte level=1;
+					ModuleData typeData=Module.moduleData[temp[i]];
+					byte level=typeData.level;
 					for(byte i2=(byte)(i+1);i2<temp.Length;i2++)
 					{
-						if(temp[i2]==temp[i])
+						if(temp[i2]!=0)
 						{
-							level++;
-							temp[i2]=0;
+							ModuleData typeData2=Module.moduleData[temp[i2]];
+							if(typeData2.type==typeData.type)
+							{
+								level+=typeData2.level;
+								temp[i2]=0;
+							}
 						}
 					}
-					compact.Push(new ModuleData(temp[i],level));
+					if(level>Module.maxModLevel[typeData.type]){level=Module.maxModLevel[typeData.type];}
+					compact.Push(new ModuleData(typeData.type,level));
 				}
 			}
 			if(compact.Count<1){compact=null;}
-			//Print();
 		}
 		public void Print()
 		{
@@ -207,7 +213,7 @@ namespace ModularWeaponry
 	{
 		public ushort type;	//Type ID
 		public byte level;	//Strength or quantity of that type
-		public ModuleData(ushort type,byte level)
+		public ModuleData(ushort type,byte level=1)
 		{
 			this.type=type;
 			this.level=level;

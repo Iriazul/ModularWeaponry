@@ -16,6 +16,8 @@ namespace ModularWeaponry.Items.Base
 	
 	public class Module:ModItem
 	{
+		public static Dictionary<ushort,ModuleData>	moduleData=new Dictionary<ushort,ModuleData>();
+		public static Dictionary<ushort,byte>		maxModLevel=new Dictionary<ushort,byte>();
 		public static Dictionary<ushort,Color?>		moduleColor=new Dictionary<ushort,Color?>();
 		public static Dictionary<ushort,Stats>		updateStats=new Dictionary<ushort,Stats>();
 		public static Dictionary<ushort,Equip>		updateEquip=new Dictionary<ushort,Equip>();
@@ -27,7 +29,8 @@ namespace ModularWeaponry.Items.Base
 		//public IType Needs=IType.None;
 		//public IType Block=IType.None;
 		public byte maxLevel=255;
-		public Color? ModuleColor;
+		public Color? textColor;
+		public ModuleData typeData;
 		
 		public virtual void Initialize(){}
 		public virtual void UpdateStats(Item item,byte level){}
@@ -43,9 +46,12 @@ namespace ModularWeaponry.Items.Base
 		{
 			item.width=Main.itemTexture[item.type].Width;
 			item.height=Main.itemTexture[item.type].Height;
+			typeData=new ModuleData((ushort)item.type);
 			Initialize();
 			item.toolTip2=this.GetCompatibilityString();
-			if(!moduleColor.ContainsKey((ushort)item.type)){moduleColor.Add((ushort)item.type,ModuleColor);}
+			if(!moduleData.ContainsKey((ushort)item.type)){moduleData.Add((ushort)item.type,typeData);}
+			if(!maxModLevel.ContainsKey((ushort)item.type)){maxModLevel.Add((ushort)item.type,maxLevel);}
+			if(!moduleColor.ContainsKey((ushort)item.type)){moduleColor.Add((ushort)item.type,textColor);}
 			if(!updateStats.ContainsKey((ushort)item.type)){updateStats.Add((ushort)item.type,UpdateStats);}
 			if(!updateEquip.ContainsKey((ushort)item.type)){updateEquip.Add((ushort)item.type,UpdateEquip);}
 			if(!onShootProj.ContainsKey((ushort)item.type)){onShootProj.Add((ushort)item.type,OnShootProj);}

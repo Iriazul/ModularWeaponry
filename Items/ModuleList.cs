@@ -17,6 +17,8 @@ namespace ModularWeaponry.Items
 			iType=IType.Any;
 			//Block=IType.None;
 			item.rare=-12;
+			textColor=Color.Black;
+			maxLevel=20;
 		}
 		public override void UpdateStats(Item item,byte level){Main.NewText("UpdateStats (Level:"+level+")");}
 		public override void UpdateEquip(Item item,Player player,byte level)
@@ -49,7 +51,8 @@ namespace ModularWeaponry.Items
 			item.name="Circuit";
 			item.toolTip="";
 			iType=IType.Weap;
-			ModuleColor=Color.Lime;
+			textColor=Color.Lime;
+			maxLevel=20;
 		}
 		public override void OnHitEffect(Item item,Entity attacker,NPC npc,byte level)
 		{
@@ -63,7 +66,8 @@ namespace ModularWeaponry.Items
 			item.name="Overclocker";
 			item.toolTip="";
 			iType=IType.Weap|IType.Tool;
-			ModuleColor=Color.Blue;
+			textColor=Color.Blue;
+			maxLevel=20;
 		}
 		public override void UpdateStats(Item item,byte level)
 		{
@@ -74,48 +78,41 @@ namespace ModularWeaponry.Items
 			if(item.useAnimation<1){item.useAnimation=1;}
 		}
 	}
-	public class SmallDamageModule:Module
+	public class DamageModule1:Module
 	{
 		public override void Initialize()
 		{
 			item.name="Small Damage Module";
 			item.toolTip="";
 			iType=IType.Weap|IType.Tool;
-			ModuleColor=Color.Red;
+			textColor=Color.Red;
+			maxLevel=20;
 		}
 		public override void UpdateStats(Item item,byte level)
 		{
 			item.damage=(int)Math.Ceiling(item.damage*(1+0.05*level));
 		}
 	}
-    public class DamageModule : Module
-    {
-        public override void Initialize()
-        {
-            item.name = "Damage Module";
-            item.toolTip = "";
-            iType = IType.Weap | IType.Tool;
-            ModuleColor = Color.Red;
-        }
-        public override void UpdateStats(Item item, byte level)
-        {
-            item.damage = (int)Math.Ceiling(item.damage * (1 + 0.1 * level));
-        }
-    }
-    public class SuperiorDamageModule : Module
-    {
-        public override void Initialize()
-        {
-            item.name = "Superior Damage Module";
-            item.toolTip = "";
-            iType = IType.Weap | IType.Tool;
-            ModuleColor = Color.Red;
-        }
-        public override void UpdateStats(Item item, byte level)
-        {
-            item.damage = (int)Math.Ceiling(item.damage * (1 + 0.15 * level));
-        }
-    }
+	public class DamageModule2: Module
+	{
+		public override void Initialize()
+		{
+			item.name="Damage Module";
+			item.toolTip="";
+			iType=IType.Weap|IType.Tool;
+			typeData=new ModuleData((ushort)mod.ItemType("DamageModule1"),2);
+		}
+	}
+	public class DamageModule3: Module
+	{
+		public override void Initialize()
+		{
+			item.name="Superior Damage Module";
+			item.toolTip="";
+			iType=IType.Weap|IType.Tool;
+			typeData=new ModuleData((ushort)mod.ItemType("DamageModule1"),3);
+		}
+	}
 
 	public class Talisman:Module
 	{
@@ -123,10 +120,9 @@ namespace ModularWeaponry.Items
 		{
 			item.name="Talisman";
 			item.toolTip="Enchants melee and ranged weapons to make them deal magic damage and use mana rather then ammo";
-			//Needs=IType.Weap;
-			//Block=IType.Magic;
-			//Allow=IType.Melee|IType.Range;
 			iType=IType.Weap|IType.Melee|IType.Range;
+			textColor=Color.Gold;
+			maxLevel=20;
 		}
 		public override void UpdateStats(Item item,byte level)
 		{
@@ -147,18 +143,13 @@ namespace ModularWeaponry.Items
 					//Bows and repeating crossbows
 					case 1:break;
 					//Guns
-					case 10:
-					case 14:
+					case 10:case 14:
 					{
 						if(item.damage<20){item.shoot=20;item.shootSpeed=10f;item.useSound=12;extraLevels=2;}//Space gun
-						else{
-							if(item.damage<40){item.shoot=88;item.shootSpeed=17f;item.useSound=12;extraLevels=2;}//Laser Rifle
-							else{
-								if(item.damage<60){item.shoot=260;item.shootSpeed=15f;item.useSound=12;extraLevels=1;}//Heatray
-								else{
-									if(item.damage<80){item.shoot=440;item.shootSpeed=20f;item.useSound=91;extraLevels=1;}//Laser Machinegun
-									else{
-										/*if(item.damage<100)*/{item.shoot=645;item.shootSpeed=10f;item.useSound=88;extraLevels=0;}//Lunar Flare
+						else{if(item.damage<40){item.shoot=88;item.shootSpeed=17f;item.useSound=12;extraLevels=2;}//Laser Rifle
+							else{if(item.damage<60){item.shoot=260;item.shootSpeed=15f;item.useSound=12;extraLevels=1;}//Heatray
+								else{if(item.damage<80){item.shoot=440;item.shootSpeed=20f;item.useSound=91;extraLevels=1;}//Laser Machinegun
+									else{/*if(item.damage<100)*/{item.shoot=645;item.shootSpeed=10f;item.useSound=88;extraLevels=0;}//Lunar Flare
 										//else{item.shoot=632;item.shootSpeed=30f;item.useSound=13;extraLevels=0;}//Last Prism
 									}
 								}
@@ -180,32 +171,34 @@ namespace ModularWeaponry.Items
 			item.name="Toxic Salve";
 			item.toolTip="";
 			iType=IType.Weap;
-			ModuleColor=Color.YellowGreen;
+			textColor=Color.YellowGreen;
+			maxLevel=20;
 		}
 		public override void OnHitEffect(Item item,Entity attacker,NPC npc,byte level)
 		{
 			npc.AddBuff(BuffID.Venom,120*level);
 		}
 	}
-    public class VampiricCharm : Module
-    {
-        public override void Initialize()
-        {
-            item.name = "Vampiric Charm";
-            item.toolTip = "Converts damage dealt to health";
-            iType = IType.Weap;
-            ModuleColor = Color.YellowGreen;
-        }
-        public override void OnHitEffect(Item item, Entity attacker, NPC npc, byte level)
-        {
-            if (attacker is Projectile)
-            {
-                Main.player[((Projectile)attacker).owner].statLife += (int)((0.1 * ((Projectile)attacker).damage) * (3 * Math.Log(level) + 1));
-            }
-            else
-            {
-                Main.player[((Projectile)attacker).owner].statLife += (int)((0.1 * ((Projectile)attacker).damage) * (3 * Math.Log(level) + 1));
-            }
-        }
-    }
+	public class VampiricCharm : Module
+	{
+		public override void Initialize()
+		{
+			item.name = "Vampiric Charm";
+			item.toolTip = "Converts damage dealt to health";
+			iType = IType.Weap;
+			textColor = Color.YellowGreen;
+			maxLevel=20;
+		}
+		public override void OnHitEffect(Item item, Entity attacker, NPC npc, byte level)
+		{
+			if (attacker is Projectile)
+			{
+				Main.player[((Projectile)attacker).owner].statLife += (int)((0.1 * ((Projectile)attacker).damage) * (3 * Math.Log(level) + 1));
+			}
+			else
+			{
+				Main.player[((Projectile)attacker).owner].statLife += (int)((0.1 * ((Projectile)attacker).damage) * (3 * Math.Log(level) + 1));
+			}
+		}
+	}
 }

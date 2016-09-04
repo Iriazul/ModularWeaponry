@@ -170,8 +170,6 @@ namespace ModularWeaponry
 			return array;
 		}
 		
-		
-		
 		public static void UpdateModules(this Item item,ushort[] modules=null)
 		{
 			if(modules!=null){item.GetModInfo<IInfo>(ModularWeaponry.mod).modules=modules;}
