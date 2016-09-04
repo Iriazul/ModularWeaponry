@@ -23,6 +23,9 @@ namespace ModularWeaponry.Items.Base
 		public static Dictionary<ushort,HitEffect>	onHitEffect=new Dictionary<ushort,HitEffect>();
 		
 		public IType iType=IType.None;
+		//public IType Allow=IType.None;
+		//public IType Needs=IType.None;
+		//public IType Block=IType.None;
 		public byte maxLevel=255;
 		public Color? ModuleColor;
 		

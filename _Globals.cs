@@ -68,7 +68,7 @@ namespace ModularWeaponry
 		public override void ModifyTooltips(Item item,List<TooltipLine> tooltips)
 		{
 			IInfo info=item.GetModInfo<IInfo>(mod);
-			if(info.compact!=null)
+			if(info!=null&&info.compact!=null)
 			{
 				TooltipLine moduleToolTip=new TooltipLine(mod,"Modules","[Modules]");
 				moduleToolTip.overrideColor=Color.Gray;
@@ -99,10 +99,10 @@ namespace ModularWeaponry
 		
 		public override void OnHitNPC(Item item,Player player,NPC npc,int damage,float knockBack,bool crit)//For melee weapons
 		{
-			Stack<ModuleData> compact=item.GetModInfo<IInfo>(mod).compact;
-			if(compact!=null)
+			IInfo info=item.GetModInfo<IInfo>(mod);
+			if(info!=null&&info.compact!=null)
 			{
-				foreach(ModuleData module in compact)
+				foreach(ModuleData module in info.compact)
 				{
 					Module.onHitEffect[module.type](item,player,npc,module.level);
 				}
@@ -161,9 +161,9 @@ namespace ModularWeaponry
 		
 		public void UpdateIInfo()
 		{
-			if(this.modules==null){this.compact=null;return;}
-			ushort[] temp=(ushort[])this.modules.Clone();
-			this.compact=new Stack<ModuleData>();
+			if(modules==null){compact=null;return;}
+			ushort[] temp=(ushort[])modules.Clone();
+			compact=new Stack<ModuleData>();
 			for(byte i=0;i<temp.Length;i++)
 			{
 				if(temp[i]!=0)
@@ -177,17 +177,36 @@ namespace ModularWeaponry
 							temp[i2]=0;
 						}
 					}
-					this.compact.Push(new ModuleData(temp[i],level));
+					compact.Push(new ModuleData(temp[i],level));
 				}
 			}
-			if(this.compact.Count==0){this.compact=null;}
+			if(compact.Count<1){compact=null;}
+			//Print();
+		}
+		public void Print()
+		{
+			if(modules!=null){
+				if(modules.Length>0){
+					string line="modules {"+modules[0];
+					for(byte i=1;i<modules.Length;i++){line+=","+modules[i];}
+					Main.NewText(line+"}");
+				}else{Main.NewText("modules array is empty");}
+			}else{Main.NewText("modules array is null");}
+			if(compact!=null){
+				if(compact.Count>0){
+					ModuleData[] temp=compact.ToArray();
+					string line="compact {["+temp[0].type+":"+temp[0].level;
+					for(byte i=1;i<temp.Length;i++){line+="],["+temp[i].type+":"+temp[i].level;}
+					Main.NewText(line+"]}");
+				}else{Main.NewText("compact stack is empty");}
+			}else{Main.NewText("compact stack is null");}
 		}
 	}
 	
 	public class ModuleData
 	{
-		public ushort type;	//ID of module
-		public byte level;	//How many of that type
+		public ushort type;	//Type ID
+		public byte level;	//Strength or quantity of that type
 		public ModuleData(ushort type,byte level)
 		{
 			this.type=type;

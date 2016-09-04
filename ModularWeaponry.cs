@@ -95,8 +95,7 @@ namespace ModularWeaponry
 								if(Main.mouseItem.type==0||item.CanEquipModule(Main.mouseItem))
 								{
 									ItemSlot.LeftClick(itemModules,0,i);
-									item.GetModInfo<IInfo>(this).modules=itemModules.ToTypeArray();
-									item.UpdateModules();
+									item.UpdateModules(itemModules.ToTypeArray());
 								}
 							}
 							ItemSlot.MouseHover(itemModules, 0, i);
@@ -173,8 +172,9 @@ namespace ModularWeaponry
 		
 		
 		
-		public static void UpdateModules(this Item item)
+		public static void UpdateModules(this Item item,ushort[] modules=null)
 		{
+			if(modules!=null){item.GetModInfo<IInfo>(ModularWeaponry.mod).modules=modules;}
 			Item temp=item.Clone();
 			item.SetDefaults(item.type);
 			item.Prefix(temp.prefix);

@@ -15,10 +15,29 @@ namespace ModularWeaponry.Items
 			item.name="TestModule";
 			item.toolTip="This module is to test the functionality of every hook";
 			iType=IType.Any;
+			//Block=IType.None;
 			item.rare=-12;
 		}
 		public override void UpdateStats(Item item,byte level){Main.NewText("UpdateStats (Level:"+level+")");}
-		public override void UpdateEquip(Item item,Player player,byte level){if((clock+=level)>=60){Main.NewText("UpdateEquip (Level:"+level+")");clock=0;}}
+		public override void UpdateEquip(Item item,Player player,byte level)
+		{
+			if((clock+=level)>=60)
+			{
+				Item heldItem=player.inventory[player.selectedItem];
+				if(heldItem!=null)
+				{
+					if(heldItem.type!=0)
+					{
+						IInfo info=heldItem.GetModInfo<IInfo>(mod);
+						if(info!=null)
+						{
+							info.Print();
+						}else{Main.NewText("Info is null");}
+					}else{Main.NewText("Item is blank");}
+				}else{Main.NewText("Item is null");}
+				clock=0;
+			}
+		}
 		public override bool OnShootProj(Item item,Player player,Projectile projectile,byte level){Main.NewText("OnShootProj (Level: "+level+")");return true;}
 		public override void OnHitEffect(Item item,Entity attacker,NPC npc,byte level){Main.NewText("OnHitEffect (Level:"+level+")");}
 	}
@@ -104,6 +123,9 @@ namespace ModularWeaponry.Items
 		{
 			item.name="Talisman";
 			item.toolTip="Enchants melee and ranged weapons to make them deal magic damage and use mana rather then ammo";
+			//Needs=IType.Weap;
+			//Block=IType.Magic;
+			//Allow=IType.Melee|IType.Range;
 			iType=IType.Weap|IType.Melee|IType.Range;
 		}
 		public override void UpdateStats(Item item,byte level)
@@ -122,21 +144,20 @@ namespace ModularWeaponry.Items
 				byte extraLevels=0;
 				switch(item.shoot)
 				{
+					//Bows and repeating crossbows
 					case 1:break;
-					case 10:case 14:
+					//Guns
+					case 10:
+					case 14:
 					{
 						if(item.damage<20){item.shoot=20;item.shootSpeed=10f;item.useSound=12;extraLevels=2;}//Space gun
-						else
-						{
+						else{
 							if(item.damage<40){item.shoot=88;item.shootSpeed=17f;item.useSound=12;extraLevels=2;}//Laser Rifle
-							else
-							{
+							else{
 								if(item.damage<60){item.shoot=260;item.shootSpeed=15f;item.useSound=12;extraLevels=1;}//Heatray
-								else
-								{
+								else{
 									if(item.damage<80){item.shoot=440;item.shootSpeed=20f;item.useSound=91;extraLevels=1;}//Laser Machinegun
-									else
-									{
+									else{
 										/*if(item.damage<100)*/{item.shoot=645;item.shootSpeed=10f;item.useSound=88;extraLevels=0;}//Lunar Flare
 										//else{item.shoot=632;item.shootSpeed=30f;item.useSound=13;extraLevels=0;}//Last Prism
 									}
@@ -148,14 +169,6 @@ namespace ModularWeaponry.Items
 				}
 				item.mana=item.useTime*2/(level+extraLevels);
 				item.damage+=extraLevels*2;
-				/*if(item.shoot==632)
-				{
-					item.autoReuse=true;
-					item.channel=true;
-					item.useAnimation = 10;
-					item.useTime = 10;
-					item.reuseDelay=5;
-				}*/
 				return;
 			}
 		}
