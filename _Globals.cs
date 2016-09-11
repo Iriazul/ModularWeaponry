@@ -5,12 +5,15 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using ModularWeaponry.Items.Base;
+using ModularWeaponry.Items;
 
 namespace ModularWeaponry
 {
-	public class GItem : GlobalItem
+	public class GItem:GlobalItem
 	{
+		/**************************\
+		|*IO AND DATA PRESERVATION*|
+		\**************************/
 		private static IInfo tempItemInfo;
 		
 		public override void PreReforge(Item item)
@@ -32,9 +35,9 @@ namespace ModularWeaponry
 			IInfo info = item.GetModInfo<IInfo>(mod);
 			if(info.modules!=null)
 			{
-				foreach(ushort type in info.modules)
+				foreach(string name in info.modules)
 				{
-					if(type!=0)
+					if(name!=null)
 					{
 						return true;
 					}
@@ -48,7 +51,8 @@ namespace ModularWeaponry
 			string writeString="";
 			for(byte i=0;i<info.modules.Length;++i)
 			{
-				writeString+=Main.itemName[info.modules[i]]+";";
+				if(i!=0){writeString+=";";}
+				if(info.modules[i]!=null){writeString+=info.modules[i];}
 			}
 			writer.Write(writeString);
 		}
@@ -56,18 +60,20 @@ namespace ModularWeaponry
 		{
 			string[] splitModules=reader.ReadString().Split(';');
 			if(splitModules.Length<=1){return;}
-			IInfo info=item.GetModInfo<IInfo>(mod);
-			info.modules=new ushort[splitModules.Length-1];
-			for(byte i=0;i<info.modules.Length;++i)
+			for(byte i=0;i<splitModules.Length;++i)
 			{
-				info.modules[i]=(ushort)mod.ItemType(splitModules[i]);
+				if(splitModules[i]==""){splitModules[i]=null;}
 			}
+			item.GetModInfo<IInfo>(mod).modules=splitModules;
 			item.UpdateModules();
 		}
 		
+		/***********\
+		|*AESTHETICS*|
+		\***********/
 		public override void ModifyTooltips(Item item,List<TooltipLine> tooltips)
 		{
-			if(item.IsModule()){tooltips[0].overrideColor=Module.moduleColor[Module.moduleData[(ushort)item.type].type];return;}
+			if(item.IsModule()){tooltips[0].overrideColor=((Module)item.modItem).textClr;return;}
 			IInfo info=item.GetModInfo<IInfo>(mod);
 			if(info!=null&&info.compact!=null)
 			{
@@ -76,13 +82,16 @@ namespace ModularWeaponry
 				tooltips.Add(moduleToolTip);
 				foreach(ModuleData module in info.compact)
 				{
-					TooltipLine line=new TooltipLine(mod,"",Main.itemName[module.type]+" [Level "+module.level+"]");
-					line.overrideColor=Module.moduleColor[module.type];
+					TooltipLine line=new TooltipLine(mod,"",((Module)mod.GetItem(module.name)).display+" [Level "+module.level+"]");
+					line.overrideColor=((Module)mod.GetItem(module.name)).textClr;
 					tooltips.Add(line);
 				}
 			}
 		}
 		
+		/*********************\
+		|*HOOK IMPLEMENTATION*|
+		\*********************/
 		public override void UpdateEquip(Item item,Player player)
 		{
 			if(item.type!=0)
@@ -92,7 +101,7 @@ namespace ModularWeaponry
 				{
 					foreach(ModuleData module in info.compact)
 					{
-						Module.updateEquip[module.type](item,player,module.level);
+						((Module)mod.GetItem(module.name)).UpdateEquip(item,player,module.level);
 					}
 				}
 			}
@@ -105,7 +114,7 @@ namespace ModularWeaponry
 			{
 				foreach(ModuleData module in info.compact)
 				{
-					Module.onHitEffect[module.type](item,player,npc,module.level);
+					((Module)mod.GetItem(module.name)).OnHitEffect(item,player,null,npc,module.level);
 				}
 			}
 		}
@@ -122,20 +131,25 @@ namespace ModularWeaponry
 				if(projectile.friendly)
 				{
 					Player player=Main.player[projectile.owner];
-					IInfo itemInfo=player.inventory[player.selectedItem].GetModInfo<IInfo>(mod);
-					if(itemInfo.compact!=null)
+					Item item=player.inventory[player.selectedItem];
+					if(item.shoot==projectile.type)
 					{
-						projInfo.modules=itemInfo.compact;
-						projInfo.item=player.inventory[player.selectedItem];
-						bool killProjectile=false;
-						foreach(ModuleData module in itemInfo.compact)
+						IInfo itemInfo=item.GetModInfo<IInfo>(mod);
+						if(itemInfo.compact!=null)
 						{
-							if(!Module.onShootProj[module.type](projInfo.item,player,projectile,module.level)){killProjectile=true;}
-						}
-						if(killProjectile)
-						{
-							projectile.hide=true;
-							projectile.active=false;
+							projInfo.modules=itemInfo.compact;
+							projInfo.item=item;
+							projInfo.player=player;
+							bool killProjectile=false;
+							foreach(ModuleData module in itemInfo.compact)
+							{
+								if(!((Module)mod.GetItem(module.name)).OnShootProj(projInfo.item,player,projectile,module.level)){killProjectile=true;}
+							}
+							if(killProjectile)
+							{
+								projectile.hide=true;
+								projectile.active=false;
+							}
 						}
 					}
 				}
@@ -144,12 +158,12 @@ namespace ModularWeaponry
 		}
 		public override void OnHitNPC(Projectile projectile,NPC npc,int damage,float knockback,bool crit)//For projectile based weapons
 		{
-			PInfo info=projectile.GetModInfo<PInfo>(mod);
-			if(info.modules!=null)
+			PInfo projInfo=projectile.GetModInfo<PInfo>(mod);
+			if(projInfo.modules!=null)
 			{
-				foreach(ModuleData module in info.modules)
+				foreach(ModuleData module in projInfo.modules)
 				{
-					Module.onHitEffect[module.type](info.item,projectile,npc,module.level);
+					((Module)mod.GetItem(module.name)).OnHitEffect(projInfo.item,projInfo.player,projectile,npc,module.level);
 				}
 			}
 		}
@@ -157,34 +171,34 @@ namespace ModularWeaponry
 		
 	public class IInfo:ItemInfo
 	{
-		public ushort[] modules;
+		public string[] modules;
 		public Stack<ModuleData> compact;
 		
 		public void UpdateIInfo()
 		{
 			if(modules==null){compact=null;return;}
-			ushort[] temp=(ushort[])modules.Clone();
+			string[] temp=(string[])modules.Clone();
 			compact=new Stack<ModuleData>();
 			for(byte i=0;i<temp.Length;i++)
 			{
-				if(temp[i]!=0)
+				if(temp[i]!=null)
 				{
-					ModuleData typeData=Module.moduleData[temp[i]];
-					byte level=typeData.level;
+					ModuleData modData=((Module)mod.GetItem(temp[i])).modData;
+					byte level=modData.level;
 					for(byte i2=(byte)(i+1);i2<temp.Length;i2++)
 					{
-						if(temp[i2]!=0)
+						if(temp[i2]!=null)
 						{
-							ModuleData typeData2=Module.moduleData[temp[i2]];
-							if(typeData2.type==typeData.type)
+							ModuleData modData2=((Module)mod.GetItem(temp[i2])).modData;
+							if(modData2.name==modData.name)
 							{
-								level+=typeData2.level;
-								temp[i2]=0;
+								level+=modData2.level;
+								temp[i2]=null;
 							}
 						}
 					}
-					if(level>Module.maxModLevel[typeData.type]){level=Module.maxModLevel[typeData.type];}
-					compact.Push(new ModuleData(typeData.type,level));
+					if(level>((Module)mod.GetItem(modData.name)).maximum){level=((Module)mod.GetItem(modData.name)).maximum;}
+					compact.Push(new ModuleData(modData.name,level));
 				}
 			}
 			if(compact.Count<1){compact=null;}
@@ -201,8 +215,8 @@ namespace ModularWeaponry
 			if(compact!=null){
 				if(compact.Count>0){
 					ModuleData[] temp=compact.ToArray();
-					string line="compact {["+temp[0].type+":"+temp[0].level;
-					for(byte i=1;i<temp.Length;i++){line+="],["+temp[i].type+":"+temp[i].level;}
+					string line="compact {["+temp[0].name+":"+temp[0].level;
+					for(byte i=1;i<temp.Length;i++){line+="],["+temp[i].name+":"+temp[i].level;}
 					Main.NewText(line+"]}");
 				}else{Main.NewText("compact stack is empty");}
 			}else{Main.NewText("compact stack is null");}
@@ -211,11 +225,11 @@ namespace ModularWeaponry
 	
 	public class ModuleData
 	{
-		public ushort type;	//Type ID
-		public byte level;	//Strength or quantity of that type
-		public ModuleData(ushort type,byte level=1)
+		public string name;
+		public byte level;	//Strength or quantity
+		public ModuleData(string name,byte level=1)
 		{
-			this.type=type;
+			this.name=name;
 			this.level=level;
 		}
 	}
@@ -225,5 +239,6 @@ namespace ModularWeaponry
 		public bool check=true;
 		public Stack<ModuleData> modules;
 		public Item item;
+		public Player player;
 	}
 }
