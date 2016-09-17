@@ -5,6 +5,21 @@ using Terraria.ID;
 
 namespace ModularWeaponry.Items
 {
+	public class BottledLava:Module
+	{
+		public override void Initialize()
+		{
+			item.name="Bottled Lava";
+			item.toolTip="Because things flying around the battlefield, covered in lava, is always a great tactic.";
+			itemTag=ItemTag.Weap;
+			textClr=Color.Orange;
+			maximum=20;
+		}
+		public override void OnHitEffect(Item item,Player player,Projectile projectile,NPC npc,byte level)
+		{
+			npc.AddBuff(BuffID.OnFire,120*level);
+		}
+	}
 	public class Circuit:Module
 	{
 		public override void Initialize()

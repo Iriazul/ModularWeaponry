@@ -132,24 +132,21 @@ namespace ModularWeaponry
 				{
 					Player player=Main.player[projectile.owner];
 					Item item=player.inventory[player.selectedItem];
-					if(item.shoot==projectile.type)
+					IInfo itemInfo=item.GetModInfo<IInfo>(mod);
+					if(itemInfo.compact!=null)
 					{
-						IInfo itemInfo=item.GetModInfo<IInfo>(mod);
-						if(itemInfo.compact!=null)
+						projInfo.modules=itemInfo.compact;
+						projInfo.item=item;
+						projInfo.player=player;
+						bool killProjectile=false;
+						foreach(ModuleData module in itemInfo.compact)
 						{
-							projInfo.modules=itemInfo.compact;
-							projInfo.item=item;
-							projInfo.player=player;
-							bool killProjectile=false;
-							foreach(ModuleData module in itemInfo.compact)
-							{
-								if(!((Module)mod.GetItem(module.name)).OnShootProj(projInfo.item,player,projectile,module.level)){killProjectile=true;}
-							}
-							if(killProjectile)
-							{
-								projectile.hide=true;
-								projectile.active=false;
-							}
+							if(!((Module)mod.GetItem(module.name)).OnShootProj(projInfo.item,player,projectile,module.level)){killProjectile=true;}
+						}
+						if(killProjectile)
+						{
+							projectile.hide=true;
+							projectile.active=false;
 						}
 					}
 				}
