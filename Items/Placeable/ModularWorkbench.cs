@@ -10,17 +10,16 @@ namespace ModularWeaponry.Items.Placeable
 	{
 		public override void SetDefaults()
 		{
-			item.name = "Modular Workbench";
-			item.width = item.height = 16;
-			item.toolTip = "Used to apply modules on weapons";
-
-			item.maxStack = 99;
-
-			item.useStyle = 1;
-			item.useTime = 15;
-			item.useAnimation = 15;
-
-			item.createTile = mod.TileType("ModularWorkbench");
+			item.name="Modular Workbench";
+			item.toolTip="Used to apply modules to weapons and tools";
+			item.width=15;
+			item.height=14;
+			item.maxStack=99;
+			item.useStyle=1;
+			item.useTime=15;
+			item.useAnimation=15;
+			item.consumable=true;
+			item.createTile=mod.TileType("ModularWorkbench");
 		}
 	}
 }

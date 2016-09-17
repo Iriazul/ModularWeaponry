@@ -7,21 +7,21 @@ using Terraria.ObjectData;
 
 namespace ModularWeaponry.Tiles
 {
-	public class ModularWorkbench : ModTile
+	public class ModularWorkbench:ModTile
 	{
 		public override void SetDefaults()
 		{
-			Main.tileSolidTop[Type] = true;
-			Main.tileFrameImportant[Type] = true;
-			Main.tileNoAttach[Type] = true;
-			Main.tileTable[Type] = true;
-			Main.tileLavaDeath[Type] = true;
-			TileObjectData.newTile.CopyFrom(TileObjectData.Style2x1);
-			TileObjectData.newTile.CoordinateHeights = new int[]{ 18 };
+			Main.tileSolidTop[Type]=true;
+			Main.tileFrameImportant[Type]=true;
+			Main.tileNoAttach[Type]=true;
+			Main.tileTable[Type]=true;
+			Main.tileLavaDeath[Type]=true;
+			TileObjectData.newTile.CopyFrom(TileObjectData.Style3x4);
+			//Needs corrected height when standing on top
 			TileObjectData.addTile(Type);
-			AddMapEntry(new Color(200, 200, 200), "Modular Workbench");
-			disableSmartCursor = true;
-			adjTiles = new int[]{ TileID.WorkBenches };
+			AddMapEntry(new Color(200,200,200),"Modular Workbench");
+			disableSmartCursor=true;
+			adjTiles=new int[]{TileID.WorkBenches};
 		}
 
 		public override void MouseOver(int i, int j)
